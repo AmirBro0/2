@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Проверка кассовых операций по видео</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <main class="container">
+      <header class="header">
+        <p class="eyebrow">ForteBank · Datathon 26</p>
+        <h1>Проверка кассовых операций по видео</h1>
+        <p class="intro">Загрузите запись. Сервис покажет возможные нарушения, время события и кадры для проверки человеком.</p>
+      </header>
+
+      <section id="readiness-panel" class="panel notice hidden" aria-live="polite">
+        <p id="readiness-text"></p>
+      </section>
+
+      <section class="panel" aria-labelledby="upload-title">
+        <h2 id="upload-title">Новое видео</h2>
+        <form id="upload-form">
+          <label for="api-key">Ключ доступа</label>
+          <input id="api-key" type="password" autocomplete="off" required placeholder="Введите X-API-Key" />
+          <label for="video-file">Видеофайл .mov</label>
+          <input id="video-file" type="file" accept=".mov,video/quicktime" required />
+          <p class="hint">Максимальный размер файла зависит от настройки сервера. Анализ выполняется локально.</p>
+          <button id="submit-button" type="submit" disabled>Начать проверку</button>
+        </form>
+      </section>
+
+      <section id="preview-panel" class="panel preview hidden" aria-labelledby="preview-title">
+        <h2 id="preview-title">Загруженное видео</h2>
+        <video id="video-preview" controls playsinline preload="metadata"></video>
+        <p id="preview-note" class="hint">Видео открывается из выбранного файла в вашем браузере.</p>
+      </section>
+
+      <section id="status-panel" class="panel hidden" aria-live="polite">
+        <h2>Статус</h2>
+        <p id="status-text"></p>
+      </section>
+
+      <section id="result-panel" class="panel hidden" aria-live="polite">
+        <h2>Результат</h2>
+        <p id="verdict" class="verdict"></p>
+        <div id="violations"></div>
+        <p class="hint">Результат помогает проверяющему найти фрагмент; окончательное решение принимает человек.</p>
+      </section>
+    </main>
+  </body>
+</html>
+

@@ -3,51 +3,62 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Проверка кассовых операций по видео</title>
-    <link rel="stylesheet" href="/static/styles.css" />
-    <script src="/static/app.js" defer></script>
+    <title>Инвентарь · ForteBank Video Review</title>
+    <link rel="stylesheet" href="/static/inventory.css" />
+    <script src="/static/inventory.js" defer></script>
   </head>
   <body>
-    <main class="container">
-      <header class="header">
-        <p class="eyebrow">ForteBank · Datathon 26</p>
-        <h1>Проверка кассовых операций по видео</h1>
-        <p class="intro">Загрузите запись. Сервис покажет возможные нарушения, время события и кадры для проверки человеком.</p>
-      </header>
+    <div class="world" aria-hidden="true"></div>
+    <main class="stage" aria-label="Инвентарь проверки видео">
+      <div id="inventory-wrap" class="inventory-wrap">
+        <section id="inventory" class="inventory" aria-label="Инвентарь">
+          <div id="craft-title" class="craft-title" data-mc-text>Создание</div>
+          <canvas id="avatar" class="avatar" width="50" height="70" role="img" aria-label="Персонаж в костюме смотрит на указатель мыши"></canvas>
 
-      <section id="readiness-panel" class="panel notice hidden" aria-live="polite">
-        <p id="readiness-text"></p>
-      </section>
+          <button id="guide-button" class="slot-button" style="left:104px;top:62px" type="button" aria-label="Справочник" data-tip="Книга знаний" data-detail="Нажмите, чтобы открыть руководство">
+            <img src="/static/minecraft-local/inventory/knowledge_book.png" alt="" />
+          </button>
 
-      <section class="panel" aria-labelledby="upload-title">
-        <h2 id="upload-title">Новое видео</h2>
-        <form id="upload-form">
-          <label for="api-key">Ключ доступа</label>
-          <input id="api-key" type="password" autocomplete="off" required placeholder="Введите X-API-Key" />
-          <label for="video-file">Видеофайл .mov</label>
-          <input id="video-file" type="file" accept=".mov,video/quicktime" required />
-          <p class="hint">Максимальный размер файла зависит от настройки сервера. Анализ выполняется локально.</p>
-          <button id="submit-button" type="submit" disabled>Начать проверку</button>
-        </form>
-      </section>
+          <div id="craft-file" class="craft-item" style="left:97px;top:17px" aria-label="Файл для проверки не выбран"></div>
+          <div id="craft-key" class="craft-item" style="left:115px;top:35px" aria-label="Ключ не добавлен"></div>
+          <button id="craft-result" class="slot-button result-item" style="left:154px;top:27px" type="button" aria-label="Око Эндера" data-tip="Око Эндера" data-detail="Открыть следующий этап" hidden>
+            <img src="/static/minecraft-local/inventory/ender_eye.png" alt="" />
+          </button>
 
-      <section id="preview-panel" class="panel preview hidden" aria-labelledby="preview-title">
-        <h2 id="preview-title">Загруженное видео</h2>
-        <video id="video-preview" controls playsinline preload="metadata"></video>
-        <p id="preview-note" class="hint">Видео открывается из выбранного файла в вашем браузере.</p>
-      </section>
-
-      <section id="status-panel" class="panel hidden" aria-live="polite">
-        <h2>Статус</h2>
-        <p id="status-text"></p>
-      </section>
-
-      <section id="result-panel" class="panel hidden" aria-live="polite">
-        <h2>Результат</h2>
-        <p id="verdict" class="verdict"></p>
-        <div id="violations"></div>
-        <p class="hint">Результат помогает проверяющему найти фрагмент; окончательное решение принимает человек.</p>
-      </section>
+          <div class="hotbar" aria-label="Быстрый доступ">
+            <button id="pearl-button" class="slot-button" style="left:8px;top:142px" type="button" aria-label="Эндер-жемчуг: выбрать файл" data-tip="Эндер-жемчуг" data-detail="Выбрать видеофайл .mov">
+              <img src="/static/minecraft-local/inventory/ender_pearl.png" alt="" />
+            </button>
+            <button id="powder-button" class="slot-button" style="left:26px;top:142px" type="button" aria-label="Огненный порошок: добавить ключ" data-tip="Огненный порошок" data-detail="Добавить X-API ключ в создание">
+              <img src="/static/minecraft-local/inventory/blaze_powder.png" alt="" />
+            </button>
+            <button id="rod-button" class="slot-button" style="left:44px;top:142px" type="button" aria-label="Огненный стержень: изменить ключ" data-tip="Огненный стержень" data-detail="Выбрать другой X-API ключ">
+              <img src="/static/minecraft-local/inventory/blaze_rod.png" alt="" />
+            </button>
+            <button id="dragon-button" class="slot-button" style="left:62px;top:142px" type="button" aria-label="Голова дракона" data-tip="Голова дракона" data-detail="Назначение появится позже">
+              <span class="dragon-icon" aria-hidden="true"><span class="dragon-eye"></span></span>
+            </button>
+            <button id="settings-button" class="slot-button" style="left:80px;top:142px" type="button" aria-label="Командный блок: настройки" data-tip="Командный блок" data-detail="Открыть настройки">
+              <span class="command-icon" aria-hidden="true"><span class="command-top"></span><span class="command-left"></span><span class="command-front"></span></span>
+            </button>
+          </div>
+        </section>
+      </div>
     </main>
+
+    <input id="video-picker" class="visually-hidden" type="file" accept=".mov,video/quicktime" />
+    <div id="item-tooltip" class="item-tooltip" role="tooltip" hidden>
+      <div id="tooltip-name"></div>
+      <div id="tooltip-detail" class="tooltip-detail"></div>
+    </div>
+
+    <div id="modal-backdrop" class="modal-backdrop" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <h2 id="modal-title"></h2>
+        <div id="modal-content"></div>
+        <div id="modal-actions" class="modal-actions"></div>
+      </section>
+    </div>
+    <div id="toast" class="toast" role="status" hidden></div>
   </body>
 </html>

@@ -287,7 +287,10 @@ form.addEventListener("submit", async (event) => {
     }
     showScreen(loadingScreen);
     await animateWorld(2600, controller.signal);
-    if (!controller.signal.aborted) window.location.assign("/app");
+    if (!controller.signal.aborted) {
+      sessionStorage.setItem("fortebank-api-key", key);
+      window.location.assign("/app");
+    }
   } catch {
     if (!controller.signal.aborted) showFailure("Локальный сервер не отвечает");
   } finally {

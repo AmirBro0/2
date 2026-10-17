@@ -58,10 +58,11 @@ def test_upload_requires_key_and_mov(tmp_path: Path):
         assert client.get("/api/v1/jobs/missing", headers={"X-API-Key": "test-secret"}).status_code == 404
 
 
-def test_intro_checks_key_and_keeps_main_page(tmp_path: Path):
+def test_intro_checks_key_and_preserves_review_page(tmp_path: Path):
     with TestClient(create_app(settings(tmp_path))) as client:
         assert "По ключу" in client.get("/").text
-        assert "Проверка кассовых операций по видео" in client.get("/app").text
+        assert "Инвентарь" in client.get("/app").text
+        assert "Проверка кассовых операций по видео" in client.get("/review").text
         assert client.get("/api/v1/auth/check").status_code == 401
         assert client.get("/api/v1/auth/check", headers={"X-API-Key": "wrong"}).status_code == 401
         response = client.get("/api/v1/auth/check", headers={"X-API-Key": "test-secret"})

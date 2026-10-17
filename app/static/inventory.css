@@ -1,0 +1,53 @@
+:root { --ui-scale: 3; color-scheme: dark; font-family: "Courier New", Consolas, monospace; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; min-width: 300px; min-height: 100vh; background: #161b2a; color: #fff; overflow: hidden; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.world { position: fixed; inset: -4%; z-index: -1; background: linear-gradient(rgba(14,17,26,.48),rgba(8,9,16,.68)), url("/static/minecraft-local/panorama_0.png") center / cover no-repeat; filter: blur(4px); animation: world-drift 34s ease-in-out infinite alternate; }
+@keyframes world-drift { from { transform: scale(1.04) translateX(-1%); } to { transform: scale(1.11) translateX(1%); } }
+.stage { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 12px; }
+.inventory-wrap { width: calc(176px * var(--ui-scale)); height: calc(166px * var(--ui-scale)); filter: drop-shadow(0 10px 16px rgba(0,0,0,.48)); }
+.inventory { width: 176px; height: 166px; position: relative; transform-origin: top left; transform: scale(var(--ui-scale)); background: #c6c6c6 url("/static/minecraft-local/inventory/inventory.png") left top / 256px 256px no-repeat; image-rendering: pixelated; }
+.craft-title { position: absolute; left: 97px; top: 4px; width: 75px; height: 11px; color: #3e3e3e; font-size: 9px; line-height: 11px; white-space: nowrap; }
+.mc-glyphs { display: block; image-rendering: pixelated; }
+.avatar { position: absolute; left: 26px; top: 8px; width: 50px; height: 70px; image-rendering: pixelated; cursor: crosshair; }
+.slot-button, .craft-item { position: absolute; width: 18px; height: 18px; padding: 1px; border: 0; background: transparent; image-rendering: pixelated; }
+.slot-button { cursor: pointer; }
+.slot-button img, .craft-item img { display: block; width: 16px; height: 16px; image-rendering: pixelated; }
+.slot-button:hover::after, .slot-button:focus-visible::after, .craft-item:hover::after { content: ""; position: absolute; inset: 0; background: url("/static/minecraft-local/inventory/slot_highlight_front.png") left top / 18px 18px no-repeat; pointer-events: none; }
+.slot-button:focus-visible { outline: 1px solid #fff; outline-offset: 0; }
+.result-item.ready { animation: result-glow 1.2s steps(2, end) infinite; }
+@keyframes result-glow { 50% { filter: brightness(1.35); } }
+.command-icon, .dragon-icon { display: block; position: relative; width: 16px; height: 16px; image-rendering: pixelated; }
+.command-top, .command-left, .command-front { position: absolute; display: block; background-repeat: no-repeat; image-rendering: pixelated; }
+.command-top { left: 4px; top: 1px; width: 9px; height: 5px; background: url("/static/minecraft-local/inventory/command_block_back.png") center / 9px 9px; transform: skewX(-38deg); }
+.command-left { left: 2px; top: 5px; width: 6px; height: 9px; background: url("/static/minecraft-local/inventory/command_block_side.png") center / 9px 9px; transform: skewY(25deg); }
+.command-front { left: 8px; top: 5px; width: 7px; height: 9px; background: url("/static/minecraft-local/inventory/command_block_front.png") center / 9px 9px; transform: skewY(-25deg); }
+.dragon-icon { background: #151516 url("/static/minecraft-local/inventory/dragon.png") -100px -8px / 128px 128px no-repeat; clip-path: polygon(7% 30%,26% 27%,33% 6%,48% 23%,65% 13%,78% 30%,94% 32%,94% 81%,70% 87%,60% 96%,31% 94%,23% 84%,5% 80%); filter: drop-shadow(1px 1px #050505); }
+.dragon-eye { position: absolute; left: 9px; top: 6px; width: 3px; height: 2px; background: #b550ed; box-shadow: 0 0 2px #cf7fff; }
+.item-tooltip { position: fixed; z-index: 20; min-width: 80px; max-width: min(420px, calc(100vw - 16px)); padding: 7px 9px; color: #fff; background: #100010; border: 7px solid transparent; border-image: url("/static/minecraft-local/inventory/tooltip_frame.png") 10 fill / 7px / 0 stretch; box-shadow: 0 4px 8px rgba(0,0,0,.55); pointer-events: none; image-rendering: pixelated; white-space: nowrap; font-size: 16px; text-shadow: 1px 1px #222; }
+.tooltip-detail { margin-top: 4px; color: #aaa; font-size: 12px; }
+.modal-backdrop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: rgba(0,0,0,.55); padding: 18px; }
+.modal { width: min(440px, 100%); padding: 20px; background: #c6c6c6; border: 4px solid #080808; box-shadow: inset 3px 3px #fff, inset -3px -3px #555, 0 12px 0 rgba(0,0,0,.35); color: #2c2c2c; image-rendering: pixelated; }
+.modal h2 { margin: 0 0 16px; font-size: 22px; font-weight: 700; }
+.modal p { margin: 0 0 12px; line-height: 1.5; font-size: 16px; }
+.modal label { display: block; margin: 10px 0 6px; font-weight: 700; }
+.modal input[type="text"] { width: 100%; padding: 9px; background: #080808; color: #fff; border: 2px solid #fff; outline: 2px solid #171717; border-radius: 0; font: 18px "Courier New", Consolas, monospace; }
+.modal-key-field { position: relative; }
+.modal-key-field input.bitmap-ready { color: transparent; caret-color: transparent; }
+.modal-key-visual { position: absolute; inset: 4px 9px; overflow: hidden; pointer-events: none; color: #fff; }
+.modal-key-render { display: block; position: absolute; left: 0; top: 1px; white-space: nowrap; }
+.modal-key-cursor { display: none; position: absolute; top: 25px; width: 8px; height: 2px; background: #fff; animation: key-blink 1s steps(1, end) infinite; }
+.modal-key-field:focus-within .modal-key-cursor { display: block; }
+@keyframes key-blink { 50% { opacity: 0; } }
+.modal input[type="checkbox"] { appearance: none; position: relative; width: 16px; height: 16px; margin: 0 4px 0 0; border: 2px solid #181818; background: #8b8b8b; box-shadow: inset 1px 1px #eee, inset -1px -1px #555; vertical-align: middle; cursor: pointer; }
+.modal input[type="checkbox"]:checked::after { content: ""; position: absolute; left: 3px; top: 0; width: 5px; height: 9px; border: solid #5dff45; border-width: 0 3px 3px 0; transform: rotate(45deg); }
+.modal input[type="checkbox"]:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+.modal .error { color: #8a1111; font-weight: 700; }
+.modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+.pixel-button { flex: 1; min-height: 34px; padding: 5px 8px; border: 2px solid #080808; background: #a7a7a7; color: #fff; font: 700 16px "Courier New", Consolas, monospace; text-shadow: 1px 1px #333; box-shadow: inset 2px 2px #eee, inset -2px -2px #555; cursor: pointer; }
+.pixel-button:hover, .pixel-button:focus-visible { background: #8799b8; outline: 2px solid #fff; outline-offset: 1px; }
+.pixel-button:active { box-shadow: inset 2px 2px #444; transform: translateY(1px); }
+.toast { position: fixed; left: 50%; bottom: 22px; z-index: 25; transform: translateX(-50%); max-width: calc(100vw - 24px); padding: 10px 14px; color: #fff; background: #100010; border: 2px solid #593597; box-shadow: 0 3px 0 #060309; text-align: center; font: 15px "Courier New", Consolas, monospace; }
+.flying-item { position: fixed; z-index: 24; width: 16px; height: 16px; pointer-events: none; image-rendering: pixelated; }
+@media (prefers-reduced-motion: reduce) { .world, .result-item.ready { animation: none; } }

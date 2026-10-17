@@ -75,6 +75,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def main_page():
         return FileResponse(STATIC_DIR / "index.html")
 
+    @app.get("/review", include_in_schema=False)
+    def review_page():
+        return FileResponse(STATIC_DIR / "review.html")
+
     @app.get("/api/v1/auth/check", dependencies=[Depends(require_api_key)], include_in_schema=False)
     def check_key():
         return {"ok": True}
