@@ -13,3 +13,4 @@ data/
 *.pth
 *.onnx
 *.safetensors
+app/static/minecraft-local/

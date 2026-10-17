@@ -58,6 +58,17 @@ def test_upload_requires_key_and_mov(tmp_path: Path):
         assert client.get("/api/v1/jobs/missing", headers={"X-API-Key": "test-secret"}).status_code == 404
 
 
+def test_intro_checks_key_and_keeps_main_page(tmp_path: Path):
+    with TestClient(create_app(settings(tmp_path))) as client:
+        assert "По ключу" in client.get("/").text
+        assert "Проверка кассовых операций по видео" in client.get("/app").text
+        assert client.get("/api/v1/auth/check").status_code == 401
+        assert client.get("/api/v1/auth/check", headers={"X-API-Key": "wrong"}).status_code == 401
+        response = client.get("/api/v1/auth/check", headers={"X-API-Key": "test-secret"})
+        assert response.status_code == 200
+        assert response.json() == {"ok": True}
+
+
 def test_analysis_returns_evidence_and_removes_upload(tmp_path: Path):
     video = sample_video(tmp_path / "clip.mov")
     config = settings(tmp_path)

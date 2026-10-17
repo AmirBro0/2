@@ -63,7 +63,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/", include_in_schema=False)
     def index():
+        return FileResponse(STATIC_DIR / "intro.html")
+
+    @app.get("/app", include_in_schema=False)
+    def main_page():
         return FileResponse(STATIC_DIR / "index.html")
+
+    @app.get("/api/v1/auth/check", dependencies=[Depends(require_api_key)], include_in_schema=False)
+    def check_key():
+        return {"ok": True}
 
     @app.get("/healthz", include_in_schema=False)
     def health():

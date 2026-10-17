@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>По ключу · ForteBank Video Review</title>
+    <link rel="stylesheet" href="/static/intro.css" />
+    <script src="/static/intro.js" defer></script>
+  </head>
+  <body>
+    <div class="world" aria-hidden="true">
+      <canvas id="panorama-canvas" class="world-canvas"></canvas>
+      <div class="world-shade"></div>
+    </div>
+
+    <main class="screen">
+      <section id="connect-screen" class="connect-screen" aria-labelledby="connect-title">
+        <h1 id="connect-title">По ключу</h1>
+        <form id="connect-form" class="connect-form">
+          <label for="intro-key">X-API ключ</label>
+          <input id="intro-key" name="key" type="password" autocomplete="off" spellcheck="false" maxlength="256" required />
+          <p id="connect-error" class="error" role="alert" hidden></p>
+          <div class="actions">
+            <button id="connect-button" class="pixel-button" type="submit">Подключиться</button>
+            <button id="cancel-button" class="pixel-button" type="button">Отмена</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="menu-screen" class="menu-screen" aria-labelledby="menu-title" hidden>
+        <div class="menu-heading">
+          <p class="menu-kicker">FORTEBANK</p>
+          <h2 id="menu-title">VIDEO REVIEW</h2>
+        </div>
+        <button id="menu-connect-button" class="pixel-button" type="button">По ключу</button>
+      </section>
+    </main>
+  </body>
+</html>
