@@ -15,24 +15,24 @@
 
     <main class="screen">
       <section id="connect-screen" class="connect-screen" aria-labelledby="connect-title">
-        <h1 id="connect-title">По ключу</h1>
+        <h1 id="connect-title" data-minecraft-text>По ключу</h1>
         <form id="connect-form" class="connect-form">
-          <label for="intro-key">X-API ключ</label>
-          <input id="intro-key" name="key" type="password" autocomplete="off" spellcheck="false" maxlength="256" required />
-          <p id="connect-error" class="error" role="alert" hidden></p>
+          <label for="intro-key" data-minecraft-text>X-API ключ</label>
+          <input id="intro-key" name="key" type="password" autocomplete="new-password" spellcheck="false" maxlength="256" required />
+          <p id="connect-error" class="error" role="alert" data-minecraft-text data-minecraft-scale="1.5" hidden></p>
           <div class="actions">
-            <button id="connect-button" class="pixel-button" type="submit">Подключиться</button>
-            <button id="cancel-button" class="pixel-button" type="button">Отмена</button>
+            <button id="connect-button" class="pixel-button" type="submit" data-minecraft-text>Подключиться</button>
+            <button id="cancel-button" class="pixel-button" type="button" data-minecraft-text>Отмена</button>
           </div>
         </form>
       </section>
 
       <section id="menu-screen" class="menu-screen" aria-labelledby="menu-title" hidden>
         <div class="menu-heading">
-          <p class="menu-kicker">FORTEBANK</p>
-          <h2 id="menu-title">VIDEO REVIEW</h2>
+          <p class="menu-kicker" data-minecraft-text data-minecraft-scale="3">FORTEBANK</p>
+          <h2 id="menu-title" data-minecraft-text data-minecraft-scale="2.5">VIDEO REVIEW</h2>
         </div>
-        <button id="menu-connect-button" class="pixel-button" type="button">По ключу</button>
+        <button id="menu-connect-button" class="pixel-button" type="button" data-minecraft-text>По ключу</button>
       </section>
     </main>
   </body>

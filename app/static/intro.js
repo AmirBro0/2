@@ -7,10 +7,119 @@ const connectButton = document.querySelector("#connect-button");
 const cancelButton = document.querySelector("#cancel-button");
 const menuConnectButton = document.querySelector("#menu-connect-button");
 const panoramaCanvas = document.querySelector("#panorama-canvas");
+keyInput.value = "";
 let pendingConnection = null;
+let minecraftFont = null;
+
+function setDisplayText(element, text) {
+  if (!minecraftFont || !text) {
+    element.textContent = text;
+    return;
+  }
+  minecraftFont.render(element, text);
+}
+
+async function loadMinecraftFont() {
+  const directory = "/static/minecraft-local/font";
+  const response = await fetch(`${directory}/glyphs.json`);
+  if (!response.ok) return;
+  const definitions = await response.json();
+  const names = ["nonlatin_european", "accented", "ascii"];
+  const images = await Promise.all(names.map((name) => new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = `${directory}/${name}.png`;
+  })));
+  const glyphs = new Map();
+  names.forEach((name, index) => {
+    const image = images[index];
+    const { chars, ascent, height } = definitions[name];
+    const cellWidth = image.width / 16;
+    const cellHeight = image.height / chars.length;
+    const sheet = document.createElement("canvas");
+    sheet.width = image.width;
+    sheet.height = image.height;
+    const context = sheet.getContext("2d", { willReadFrequently: true });
+    context.drawImage(image, 0, 0);
+    const pixels = context.getImageData(0, 0, image.width, image.height).data;
+    chars.forEach((row, rowIndex) => {
+      Array.from(row).forEach((character, columnIndex) => {
+        if (!character || character === "\u0000" || glyphs.has(character)) return;
+        let rightmost = -1;
+        for (let y = 0; y < cellHeight; y++) {
+          for (let x = 0; x < cellWidth; x++) {
+            const offset = ((rowIndex * cellHeight + y) * image.width + columnIndex * cellWidth + x) * 4 + 3;
+            if (pixels[offset] > 0) rightmost = Math.max(rightmost, x);
+          }
+        }
+        if (rightmost < 0) return;
+        glyphs.set(character, {
+          image, x: columnIndex * cellWidth, y: rowIndex * cellHeight,
+          cellWidth, cellHeight, ascent, height,
+          advance: Math.ceil((rightmost + 1) * height / cellHeight) + 1,
+        });
+      });
+    });
+  });
+
+  function advance(character) {
+    return character === " " ? 4 : (glyphs.get(character) || glyphs.get("?"))?.advance || 8;
+  }
+  function widthOf(text) {
+    return Array.from(text).reduce((total, character) => total + advance(character), 0);
+  }
+  minecraftFont = {
+    render(element, text) {
+      const scale = Number(element.dataset.minecraftScale || 2);
+      const maxWidth = element.classList.contains("error") ? Math.max(1, element.clientWidth / scale) : Infinity;
+      const lines = [""];
+      for (const word of text.split(" ")) {
+        const current = lines.length - 1;
+        const candidate = lines[current] ? `${lines[current]} ${word}` : word;
+        if (lines[current] && widthOf(candidate) > maxWidth) lines.push(word);
+        else lines[current] = candidate;
+      }
+      const canvas = document.createElement("canvas");
+      canvas.className = "mc-glyphs";
+      canvas.setAttribute("aria-hidden", "true");
+      canvas.width = Math.max(1, Math.ceil(Math.max(...lines.map(widthOf)) * scale));
+      canvas.height = Math.ceil((12 * lines.length + 2 * (lines.length - 1)) * scale);
+      const context = canvas.getContext("2d");
+      context.imageSmoothingEnabled = false;
+      lines.forEach((line, lineIndex) => {
+        let cursor = 0;
+        for (const character of line) {
+          const glyph = glyphs.get(character) || glyphs.get("?");
+          if (glyph) {
+            context.drawImage(
+              glyph.image, glyph.x, glyph.y, glyph.cellWidth, glyph.cellHeight,
+              cursor * scale, (lineIndex * 14 + 10 - glyph.ascent) * scale,
+              glyph.cellWidth * scale, glyph.height * scale,
+            );
+          }
+          cursor += advance(character);
+        }
+      });
+      context.globalCompositeOperation = "source-in";
+      context.fillStyle = getComputedStyle(element).color;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      const accessibleText = document.createElement("span");
+      accessibleText.className = "sr-only";
+      accessibleText.textContent = text;
+      element.replaceChildren(accessibleText, canvas);
+    },
+  };
+  document.querySelectorAll("[data-minecraft-text]").forEach((element) => {
+    const text = element.textContent.trim();
+    if (text) setDisplayText(element, text);
+  });
+}
+
+loadMinecraftFont().catch(() => {});
 
 function showError(message) {
-  errorText.textContent = message;
+  setDisplayText(errorText, message);
   errorText.hidden = !message;
 }
 
@@ -45,7 +154,7 @@ form.addEventListener("submit", async (event) => {
   }
   showError("");
   connectButton.disabled = true;
-  connectButton.textContent = "Подключение...";
+  setDisplayText(connectButton, "Подключение...");
   const controller = new AbortController();
   pendingConnection = controller;
   try {
@@ -69,7 +178,7 @@ form.addEventListener("submit", async (event) => {
   } finally {
     if (pendingConnection === controller) pendingConnection = null;
     connectButton.disabled = false;
-    connectButton.textContent = "Подключиться";
+    setDisplayText(connectButton, "Подключиться");
   }
 });
 
