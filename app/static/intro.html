@@ -19,7 +19,7 @@
         <form id="connect-form" class="connect-form">
           <label for="intro-key" data-minecraft-text>X-API ключ</label>
           <div class="key-field">
-            <input id="intro-key" name="key" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="256" required />
+            <input id="intro-key" name="key" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="256" />
             <div id="key-visual" class="key-visual" aria-hidden="true">
               <span id="key-render" data-minecraft-scale="2"></span><span id="key-cursor" class="key-cursor"></span>
             </div>
@@ -40,7 +40,7 @@
         <div class="loading-content">
           <p data-minecraft-text data-minecraft-scale="1.5">Загрузка сайта...</p>
           <div class="load-track"><div id="load-progress" class="load-progress"></div></div>
-          <canvas id="world-build" class="world-build" width="232" height="144" role="img" aria-label="Анимация генерации мира из блоков"></canvas>
+          <canvas id="world-build" class="world-build" width="104" height="104" role="img" aria-label="Карта загрузки участков мира"></canvas>
         </div>
       </section>
 

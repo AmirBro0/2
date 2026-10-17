@@ -206,46 +206,20 @@ function showFailure(reason) {
 
 function drawWorld(progress) {
   const context = worldBuild.getContext("2d");
-  context.clearRect(0, 0, worldBuild.width, worldBuild.height);
-  context.fillStyle = "rgba(0, 0, 0, .8)";
-  context.fillRect(12, 4, 208, 136);
   context.fillStyle = "#050505";
-  context.fillRect(12, 4, 208, 5);
-  context.fillRect(12, 135, 208, 5);
-  context.fillRect(12, 4, 5, 136);
-  context.fillRect(215, 4, 5, 136);
-
-  function polygon(points, color) {
-    context.fillStyle = color;
-    context.beginPath();
-    context.moveTo(...points[0]);
-    points.slice(1).forEach((point) => context.lineTo(...point));
-    context.closePath();
-    context.fill();
-  }
-
-  for (let diagonal = 0; diagonal <= 14; diagonal++) {
-    for (let x = 0; x < 8; x++) {
-      const z = diagonal - x;
-      if (z < 0 || z >= 8) continue;
-      const order = (diagonal * 8 + x) / 120;
-      if (progress < order) continue;
-      const height = 1 + ((x * 7 + z * 11 + x * z) % 3);
-      const px = 116 + (x - z) * 10;
-      const py = 30 + (x + z) * 5 - height * 3;
-      const depth = 7 + height * 3;
-      const water = (x === 5 && z >= 3) || (x === 6 && z >= 4);
-      const sand = !water && (x === 4 && z >= 3);
-      const top = water ? "#377abc" : sand ? "#dfd39a" : "#62ad49";
-      const left = water ? "#255489" : sand ? "#ab996e" : "#79532f";
-      const right = water ? "#1c416d" : sand ? "#91815b" : "#593c23";
-      polygon([[px - 10, py + 5], [px, py + 10], [px, py + 10 + depth], [px - 10, py + 5 + depth]], left);
-      polygon([[px, py + 10], [px + 10, py + 5], [px + 10, py + 5 + depth], [px, py + 10 + depth]], right);
-      polygon([[px, py], [px + 10, py + 5], [px, py + 10], [px - 10, py + 5]], top);
-      if (!water && !sand && (x + z) % 5 === 0) {
-        context.fillStyle = "#8acc64";
-        context.fillRect(px - 2, py + 3, 3, 2);
-      }
+  context.fillRect(0, 0, 104, 104);
+  // Minecraft Java shows a square map of chunk statuses while the world loads.
+  // This local intro animates that visual pattern; it does not claim to load game chunks.
+  const statusColors = ["#292929", "#37576a", "#477b99", "#68872c", "#8fa752", "#b9b9b9", "#f4f4f4"];
+  for (let z = 0; z < 24; z++) {
+    for (let x = 0; x < 24; x++) {
+      const radius = Math.max(Math.abs(x - 11.5), Math.abs(z - 11.5)) / 11.5;
+      const variation = ((x * 17 + z * 29 + x * z * 7) % 11 - 5) * .009;
+      const state = progress * 1.18 - radius * .88 + variation;
+      const index = state < 0 ? 0 : state < .10 ? 1 : state < .18 ? 2
+        : state < .28 ? 3 : state < .40 ? 4 : state < .52 ? 5 : 6;
+      context.fillStyle = statusColors[index];
+      context.fillRect(4 + x * 4, 4 + z * 4, 4, 4);
     }
   }
 }
@@ -271,21 +245,35 @@ function animateWorld(duration, signal) {
   });
 }
 
+async function checkKey(key, signal) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      return await fetch("/api/v1/auth/check", {
+        headers: { "X-API-Key": key },
+        cache: "no-store",
+        signal,
+      });
+    } catch (error) {
+      if (signal.aborted || attempt === 1) throw error;
+      await delay(250, signal);
+    }
+  }
+}
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const key = keyInput.value.trim();
-  if (!key) return;
+  if (!key) {
+    showFailure("X-API ключ не указан");
+    return;
+  }
   const controller = new AbortController();
   pendingConnection = controller;
   showScreen(checkingScreen);
   checkingCancel.focus();
   try {
     const [response] = await Promise.all([
-      fetch("/api/v1/auth/check", {
-        headers: { "X-API-Key": key },
-        cache: "no-store",
-        signal: controller.signal,
-      }),
+      checkKey(key, controller.signal),
       delay(950, controller.signal),
     ]);
     if (controller.signal.aborted) return;
@@ -301,7 +289,7 @@ form.addEventListener("submit", async (event) => {
     await animateWorld(2600, controller.signal);
     if (!controller.signal.aborted) window.location.assign("/app");
   } catch {
-    if (!controller.signal.aborted) showFailure("Не удалось подключиться к сервису");
+    if (!controller.signal.aborted) showFailure("Локальный сервер не отвечает");
   } finally {
     if (pendingConnection === controller) pendingConnection = null;
   }
