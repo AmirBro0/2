@@ -9,6 +9,34 @@ const verdict = document.querySelector("#verdict");
 const violationsContainer = document.querySelector("#violations");
 const readinessPanel = document.querySelector("#readiness-panel");
 const readinessText = document.querySelector("#readiness-text");
+const previewPanel = document.querySelector("#preview-panel");
+const previewVideo = document.querySelector("#video-preview");
+const previewNote = document.querySelector("#preview-note");
+let previewUrl = null;
+
+fileInput.addEventListener("change", () => {
+  if (previewUrl) URL.revokeObjectURL(previewUrl);
+  previewUrl = null;
+  previewVideo.removeAttribute("src");
+  previewVideo.load();
+  const file = fileInput.files[0];
+  if (!file) {
+    previewPanel.classList.add("hidden");
+    return;
+  }
+  previewUrl = URL.createObjectURL(file);
+  previewVideo.src = previewUrl;
+  previewPanel.classList.remove("hidden");
+  previewNote.textContent = "Видео открывается из выбранного файла в вашем браузере.";
+});
+
+previewVideo.addEventListener("error", () => {
+  previewNote.textContent = "Этот браузер не воспроизводит файл .mov. Кадры результата останутся доступны ниже.";
+});
+
+window.addEventListener("beforeunload", () => {
+  if (previewUrl) URL.revokeObjectURL(previewUrl);
+});
 
 fetch("/healthz")
   .then((response) => response.json())
@@ -56,7 +84,21 @@ function renderResult(result) {
     title.textContent = item.type;
     const time = document.createElement("p");
     time.className = "time";
-    time.textContent = `Время: ${formatTime(item.timecode_sec)}`;
+    time.append("Время: ");
+    const jump = document.createElement("button");
+    jump.type = "button";
+    jump.className = "time-jump";
+    jump.textContent = formatTime(item.timecode_sec);
+    jump.title = "Перейти к событию в видео";
+    jump.addEventListener("click", () => {
+      if (previewVideo.error) {
+        previewNote.textContent = "Браузер не воспроизводит этот .mov; используйте кадры-доказательства.";
+        return;
+      }
+      previewVideo.currentTime = item.timecode_sec;
+      previewPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    time.append(jump);
     const description = document.createElement("p");
     description.textContent = item.description;
     article.append(title, time, description);

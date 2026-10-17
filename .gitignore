@@ -5,3 +5,11 @@ __pycache__/
 .env
 data/
 *.py[cod]
+*.mov
+*.mp4
+*.zip
+*.xlsx
+*.pt
+*.pth
+*.onnx
+*.safetensors

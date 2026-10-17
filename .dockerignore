@@ -6,3 +6,11 @@ data
 tests
 .env
 *.pyc
+*.mov
+*.mp4
+*.zip
+*.xlsx
+*.pt
+*.pth
+*.onnx
+*.safetensors
