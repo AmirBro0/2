@@ -15,6 +15,10 @@
         <p class="intro">Загрузите запись. Сервис покажет возможные нарушения, время события и кадры для проверки человеком.</p>
       </header>
 
+      <section id="readiness-panel" class="panel notice hidden" aria-live="polite">
+        <p id="readiness-text"></p>
+      </section>
+
       <section class="panel" aria-labelledby="upload-title">
         <h2 id="upload-title">Новое видео</h2>
         <form id="upload-form">
@@ -23,7 +27,7 @@
           <label for="video-file">Видеофайл .mov</label>
           <input id="video-file" type="file" accept=".mov,video/quicktime" required />
           <p class="hint">Максимальный размер файла зависит от настройки сервера. Анализ выполняется локально.</p>
-          <button id="submit-button" type="submit">Начать проверку</button>
+          <button id="submit-button" type="submit" disabled>Начать проверку</button>
         </form>
       </section>
 

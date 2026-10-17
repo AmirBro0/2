@@ -64,10 +64,11 @@ def test_analysis_returns_evidence_and_removes_upload(tmp_path: Path):
     with TestClient(create_app(config)) as client:
         response = client.post(
             "/api/v1/analyze",
-            headers={"X-API-Key": "test-secret", "Prefer": "respond-async"},
+            headers={"X-API-Key": "test-secret"},
             files={"file": ("clip.mov", video, "video/quicktime")},
         )
         assert response.status_code == 202
+        assert set(response.json()) == {"job_id"}
         job_id = response.json()["job_id"]
         result = wait_for_job(client, job_id)
         assert result["status"] == "done", result
@@ -87,24 +88,9 @@ def test_unconfigured_analyzer_fails_instead_of_reporting_clean(tmp_path: Path):
     with TestClient(create_app(config)) as client:
         response = client.post(
             "/api/v1/analyze",
-            headers={"X-API-Key": "test-secret", "Prefer": "respond-async"},
+            headers={"X-API-Key": "test-secret"},
             files={"file": ("clip.mov", video)},
         )
         result = wait_for_job(client, response.json()["job_id"])
         assert result["status"] == "failed"
         assert "not been connected" in result["error"]
-
-
-def test_synchronous_api_returns_jury_schema(tmp_path: Path):
-    video = sample_video(tmp_path / "clip.mov")
-    with TestClient(create_app(settings(tmp_path))) as client:
-        response = client.post(
-            "/api/v1/analyze",
-            headers={"X-API-Key": "test-secret"},
-            files={"file": ("clip.mov", video, "video/quicktime")},
-        )
-        assert response.status_code == 200
-        result = response.json()
-        assert set(result) == {"verdict", "violations"}
-        assert result["verdict"] == "violation"
-        assert result["violations"][0]["evidence_frames"]

@@ -3,7 +3,6 @@ from pathlib import Path
 import asyncio
 import hmac
 import json
-import time
 import uuid
 
 from fastapi import Depends, FastAPI, File, Header, HTTPException, Request, UploadFile
@@ -77,11 +76,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def rules():
         return list(rule_catalog().values())
 
-    @app.post("/api/v1/analyze", dependencies=[Depends(require_api_key)])
-    async def analyze(
-        file: UploadFile = File(...),
-        prefer: str | None = Header(default=None, alias="Prefer"),
-    ):
+    @app.post("/api/v1/analyze", status_code=202, dependencies=[Depends(require_api_key)])
+    async def analyze(file: UploadFile = File(...)):
         if not file.filename or not file.filename.lower().endswith(".mov"):
             raise HTTPException(status_code=415, detail="Upload a .mov video")
         job_id = uuid.uuid4().hex[:16]
@@ -104,17 +100,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             await file.close()
 
         runner.wake()
-        if prefer and "respond-async" in prefer.lower():
-            return JSONResponse({"job_id": job_id}, status_code=202)
-        deadline = time.monotonic() + 295
-        while time.monotonic() < deadline:
-            job = store.get(job_id)
-            if job is not None and job["status"] == "done":
-                return JSONResponse(json.loads(job["result_json"]))
-            if job is not None and job["status"] == "failed":
-                raise HTTPException(status_code=500, detail=job["error"] or "Analysis failed")
-            await asyncio.sleep(0.2)
-        raise HTTPException(status_code=504, detail="Analysis exceeded the API time limit")
+        return {"job_id": job_id}
 
     @app.get("/api/v1/jobs/{job_id}", dependencies=[Depends(require_api_key)])
     def get_job(job_id: str):

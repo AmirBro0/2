@@ -15,6 +15,8 @@ h3 { margin: 0 0 8px; font-size: 17px; }
 p { line-height: 1.55; }
 .intro { max-width: 690px; color: #566579; font-size: 17px; }
 .panel { background: white; border: 1px solid #dce4ed; border-radius: 14px; padding: 28px; margin-top: 20px; box-shadow: 0 4px 18px rgba(24, 46, 72, .04); }
+.notice { background: #fff8e7; border-color: #e8cf91; }
+.notice p { margin: 0; }
 .hidden { display: none; }
 form { display: grid; gap: 12px; }
 label { font-weight: 650; margin-top: 6px; }
@@ -23,7 +25,7 @@ input[type=file] { padding: 10px; }
 input:focus { outline: 3px solid #c8e7ff; border-color: #0967af; }
 button { justify-self: start; margin-top: 8px; padding: 12px 22px; border: 0; border-radius: 8px; background: #0967af; color: white; font: inherit; font-weight: 700; cursor: pointer; }
 button:hover { background: #07568f; }
-button:disabled { opacity: .6; cursor: wait; }
+button:disabled { opacity: .6; cursor: not-allowed; }
 .hint { color: #657589; font-size: 13px; margin: 2px 0 0; }
 .verdict { font-size: 19px; font-weight: 750; }
 .violation { border-top: 1px solid #e0e7ef; padding-top: 22px; margin-top: 22px; }

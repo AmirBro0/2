@@ -7,6 +7,23 @@ const statusText = document.querySelector("#status-text");
 const resultPanel = document.querySelector("#result-panel");
 const verdict = document.querySelector("#verdict");
 const violationsContainer = document.querySelector("#violations");
+const readinessPanel = document.querySelector("#readiness-panel");
+const readinessText = document.querySelector("#readiness-text");
+
+fetch("/healthz")
+  .then((response) => response.json())
+  .then(({ ready }) => {
+    if (ready) {
+      submitButton.disabled = false;
+    } else {
+      readinessText.textContent = "Модель анализа пока не подключена. Загрузка будет доступна после её подключения.";
+      readinessPanel.classList.remove("hidden");
+    }
+  })
+  .catch(() => {
+    readinessText.textContent = "Не удалось проверить готовность сервиса. Обновите страницу позже.";
+    readinessPanel.classList.remove("hidden");
+  });
 
 let rulesByTitle = new Map();
 fetch("/api/v1/rules")
@@ -108,7 +125,7 @@ form.addEventListener("submit", async (event) => {
     data.append("file", file);
     const response = await fetch("/api/v1/analyze", {
       method: "POST",
-      headers: { "X-API-Key": apiKey, Prefer: "respond-async" },
+      headers: { "X-API-Key": apiKey },
       body: data,
     });
     if (!response.ok) {
