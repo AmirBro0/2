@@ -90,7 +90,7 @@ async function loadMinecraftFont() {
       lines.forEach((line, lineIndex) => {
         let cursor = 0;
         for (const character of line) {
-          const glyph = glyphs.get(character) || glyphs.get("?");
+          const glyph = character === " " ? null : glyphs.get(character) || glyphs.get("?");
           if (glyph) {
             context.drawImage(
               glyph.image, glyph.x, glyph.y, glyph.cellWidth, glyph.cellHeight,
