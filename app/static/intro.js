@@ -1,11 +1,21 @@
 const connectScreen = document.querySelector("#connect-screen");
 const menuScreen = document.querySelector("#menu-screen");
+const checkingScreen = document.querySelector("#checking-screen");
+const loadingScreen = document.querySelector("#loading-screen");
+const failureScreen = document.querySelector("#failure-screen");
 const form = document.querySelector("#connect-form");
 const keyInput = document.querySelector("#intro-key");
-const errorText = document.querySelector("#connect-error");
+const keyVisual = document.querySelector("#key-visual");
+const keyRender = document.querySelector("#key-render");
+const keyCursor = document.querySelector("#key-cursor");
 const connectButton = document.querySelector("#connect-button");
 const cancelButton = document.querySelector("#cancel-button");
 const menuConnectButton = document.querySelector("#menu-connect-button");
+const checkingCancel = document.querySelector("#checking-cancel");
+const failureBack = document.querySelector("#failure-back");
+const failureReason = document.querySelector("#failure-reason");
+const loadProgress = document.querySelector("#load-progress");
+const worldBuild = document.querySelector("#world-build");
 const panoramaCanvas = document.querySelector("#panorama-canvas");
 keyInput.value = "";
 let pendingConnection = null;
@@ -27,7 +37,10 @@ async function loadMinecraftFont() {
   const names = ["nonlatin_european", "accented", "ascii"];
   const images = await Promise.all(names.map((name) => new Promise((resolve, reject) => {
     const image = new Image();
-    image.onload = () => resolve(image);
+    image.onload = async () => {
+      try { await image.decode(); } catch { /* drawImage can still use the loaded image. */ }
+      resolve(image);
+    };
     image.onerror = reject;
     image.src = `${directory}/${name}.png`;
   })));
@@ -70,6 +83,7 @@ async function loadMinecraftFont() {
     return Array.from(text).reduce((total, character) => total + advance(character), 0);
   }
   minecraftFont = {
+    widthOf,
     render(element, text) {
       const scale = Number(element.dataset.minecraftScale || 2);
       const maxWidth = element.classList.contains("error") ? Math.max(1, element.clientWidth / scale) : Infinity;
@@ -114,73 +128,187 @@ async function loadMinecraftFont() {
     const text = element.textContent.trim();
     if (text) setDisplayText(element, text);
   });
+  renderKeyInput();
 }
 
 loadMinecraftFont().catch(() => {});
 
-function showError(message) {
-  setDisplayText(errorText, message);
-  errorText.hidden = !message;
+function renderKeyInput() {
+  const value = keyInput.value;
+  setDisplayText(keyRender, value);
+  const position = keyInput.selectionStart ?? value.length;
+  const cursorX = minecraftFont ? minecraftFont.widthOf(value.slice(0, position)) * 2 : position * 12;
+  const totalWidth = minecraftFont ? minecraftFont.widthOf(value) * 2 : value.length * 12;
+  const offset = Math.max(0, totalWidth - keyVisual.clientWidth + 25);
+  keyRender.style.transform = `translateX(${-offset}px)`;
+  keyCursor.style.left = `${8 + cursorX - offset}px`;
+}
+
+keyInput.addEventListener("input", renderKeyInput);
+keyInput.addEventListener("click", renderKeyInput);
+keyInput.addEventListener("keyup", renderKeyInput);
+keyInput.addEventListener("select", renderKeyInput);
+window.addEventListener("resize", renderKeyInput);
+
+function showScreen(screen) {
+  [connectScreen, menuScreen, checkingScreen, loadingScreen, failureScreen].forEach((candidate) => {
+    candidate.hidden = candidate !== screen;
+  });
 }
 
 function showMenu() {
   pendingConnection?.abort();
   keyInput.value = "";
-  showError("");
-  connectScreen.hidden = true;
-  menuScreen.hidden = false;
+  renderKeyInput();
+  showScreen(menuScreen);
   menuConnectButton.focus();
 }
 
 function showConnect() {
-  menuScreen.hidden = true;
-  connectScreen.hidden = false;
+  pendingConnection?.abort();
+  showScreen(connectScreen);
   keyInput.focus();
+  renderKeyInput();
 }
 
 cancelButton.addEventListener("click", showMenu);
 menuConnectButton.addEventListener("click", showConnect);
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && !connectScreen.hidden) showMenu();
+checkingCancel.addEventListener("click", showConnect);
+failureBack.addEventListener("click", () => {
+  showConnect();
+  keyInput.select();
 });
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  if (!connectScreen.hidden) showMenu();
+  else if (!checkingScreen.hidden || !failureScreen.hidden) showConnect();
+});
+
+function delay(milliseconds, signal) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      signal.removeEventListener("abort", onAbort);
+      resolve();
+    }, milliseconds);
+    function onAbort() {
+      clearTimeout(timer);
+      reject(new DOMException("Cancelled", "AbortError"));
+    }
+    signal.addEventListener("abort", onAbort, { once: true });
+  });
+}
+
+function showFailure(reason) {
+  setDisplayText(failureReason, reason);
+  showScreen(failureScreen);
+  failureBack.focus();
+}
+
+function drawWorld(progress) {
+  const context = worldBuild.getContext("2d");
+  context.clearRect(0, 0, worldBuild.width, worldBuild.height);
+  context.fillStyle = "rgba(0, 0, 0, .8)";
+  context.fillRect(12, 4, 208, 136);
+  context.fillStyle = "#050505";
+  context.fillRect(12, 4, 208, 5);
+  context.fillRect(12, 135, 208, 5);
+  context.fillRect(12, 4, 5, 136);
+  context.fillRect(215, 4, 5, 136);
+
+  function polygon(points, color) {
+    context.fillStyle = color;
+    context.beginPath();
+    context.moveTo(...points[0]);
+    points.slice(1).forEach((point) => context.lineTo(...point));
+    context.closePath();
+    context.fill();
+  }
+
+  for (let diagonal = 0; diagonal <= 14; diagonal++) {
+    for (let x = 0; x < 8; x++) {
+      const z = diagonal - x;
+      if (z < 0 || z >= 8) continue;
+      const order = (diagonal * 8 + x) / 120;
+      if (progress < order) continue;
+      const height = 1 + ((x * 7 + z * 11 + x * z) % 3);
+      const px = 116 + (x - z) * 10;
+      const py = 30 + (x + z) * 5 - height * 3;
+      const depth = 7 + height * 3;
+      const water = (x === 5 && z >= 3) || (x === 6 && z >= 4);
+      const sand = !water && (x === 4 && z >= 3);
+      const top = water ? "#377abc" : sand ? "#dfd39a" : "#62ad49";
+      const left = water ? "#255489" : sand ? "#ab996e" : "#79532f";
+      const right = water ? "#1c416d" : sand ? "#91815b" : "#593c23";
+      polygon([[px - 10, py + 5], [px, py + 10], [px, py + 10 + depth], [px - 10, py + 5 + depth]], left);
+      polygon([[px, py + 10], [px + 10, py + 5], [px + 10, py + 5 + depth], [px, py + 10 + depth]], right);
+      polygon([[px, py], [px + 10, py + 5], [px, py + 10], [px - 10, py + 5]], top);
+      if (!water && !sand && (x + z) % 5 === 0) {
+        context.fillStyle = "#8acc64";
+        context.fillRect(px - 2, py + 3, 3, 2);
+      }
+    }
+  }
+}
+
+function animateWorld(duration, signal) {
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const start = performance.now();
+  loadProgress.style.width = "0%";
+  drawWorld(0);
+  return new Promise((resolve, reject) => {
+    function frame(now) {
+      if (signal.aborted) {
+        reject(new DOMException("Cancelled", "AbortError"));
+        return;
+      }
+      const progress = Math.min(1, (now - start) / duration);
+      loadProgress.style.width = `${Math.round(progress * 100)}%`;
+      drawWorld(reducedMotion ? 1 : progress);
+      if (progress < 1) requestAnimationFrame(frame);
+      else resolve();
+    }
+    requestAnimationFrame(frame);
+  });
+}
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const key = keyInput.value.trim();
-  if (!key) {
-    showError("Введите X-API ключ.");
-    keyInput.focus();
-    return;
-  }
-  showError("");
-  connectButton.disabled = true;
-  setDisplayText(connectButton, "Подключение...");
+  if (!key) return;
   const controller = new AbortController();
   pendingConnection = controller;
+  showScreen(checkingScreen);
+  checkingCancel.focus();
   try {
-    const response = await fetch("/api/v1/auth/check", {
-      headers: { "X-API-Key": key },
-      cache: "no-store",
-      signal: controller.signal,
-    });
+    const [response] = await Promise.all([
+      fetch("/api/v1/auth/check", {
+        headers: { "X-API-Key": key },
+        cache: "no-store",
+        signal: controller.signal,
+      }),
+      delay(950, controller.signal),
+    ]);
     if (controller.signal.aborted) return;
     if (response.status === 401) {
-      showError("Неверный X-API ключ.");
+      showFailure("Неверный X-API ключ");
       return;
     }
     if (!response.ok) {
-      showError("Сервис временно недоступен. Попробуйте ещё раз.");
+      showFailure("Сервис временно недоступен");
       return;
     }
-    window.location.assign("/app");
+    showScreen(loadingScreen);
+    await animateWorld(2600, controller.signal);
+    if (!controller.signal.aborted) window.location.assign("/app");
   } catch {
-    if (!controller.signal.aborted) showError("Не удалось подключиться к сервису.");
+    if (!controller.signal.aborted) showFailure("Не удалось подключиться к сервису");
   } finally {
     if (pendingConnection === controller) pendingConnection = null;
-    connectButton.disabled = false;
-    setDisplayText(connectButton, "Подключиться");
   }
 });
+
+renderKeyInput();
+requestAnimationFrame(() => keyInput.focus());
 
 // The six images are copied from this computer's installed game, never bundled
 // with the public repository. A cube texture gives the menu a genuine 360° view.

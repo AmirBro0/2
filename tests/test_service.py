@@ -69,6 +69,15 @@ def test_intro_checks_key_and_keeps_main_page(tmp_path: Path):
         assert response.json() == {"ok": True}
 
 
+def test_demo_key_is_opt_in(tmp_path: Path):
+    config = settings(tmp_path)
+    with TestClient(create_app(config)) as client:
+        assert client.get("/api/v1/auth/check", headers={"X-API-Key": "test"}).status_code == 401
+    with TestClient(create_app(Settings(**{**config.__dict__, "demo_key_enabled": True}))) as client:
+        assert client.get("/api/v1/auth/check", headers={"X-API-Key": "test"}).status_code == 200
+        assert client.get("/api/v1/auth/check", headers={"X-API-Key": "wrong"}).status_code == 401
+
+
 def test_analysis_returns_evidence_and_removes_upload(tmp_path: Path):
     video = sample_video(tmp_path / "clip.mov")
     config = settings(tmp_path)

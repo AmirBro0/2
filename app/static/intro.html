@@ -18,13 +18,36 @@
         <h1 id="connect-title" data-minecraft-text>По ключу</h1>
         <form id="connect-form" class="connect-form">
           <label for="intro-key" data-minecraft-text>X-API ключ</label>
-          <input id="intro-key" name="key" type="password" autocomplete="new-password" spellcheck="false" maxlength="256" required />
-          <p id="connect-error" class="error" role="alert" data-minecraft-text data-minecraft-scale="1.5" hidden></p>
+          <div class="key-field">
+            <input id="intro-key" name="key" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="256" required />
+            <div id="key-visual" class="key-visual" aria-hidden="true">
+              <span id="key-render" data-minecraft-scale="2"></span><span id="key-cursor" class="key-cursor"></span>
+            </div>
+          </div>
           <div class="actions">
             <button id="connect-button" class="pixel-button" type="submit" data-minecraft-text>Подключиться</button>
             <button id="cancel-button" class="pixel-button" type="button" data-minecraft-text>Отмена</button>
           </div>
         </form>
+      </section>
+
+      <section id="checking-screen" class="status-screen" aria-live="polite" hidden>
+        <p data-minecraft-text data-minecraft-scale="1.5">Подключение к серверу...</p>
+        <button id="checking-cancel" class="pixel-button" type="button" data-minecraft-text data-minecraft-scale="1.5">Отмена</button>
+      </section>
+
+      <section id="loading-screen" class="status-screen" aria-live="polite" hidden>
+        <div class="loading-content">
+          <p data-minecraft-text data-minecraft-scale="1.5">Загрузка сайта...</p>
+          <div class="load-track"><div id="load-progress" class="load-progress"></div></div>
+          <canvas id="world-build" class="world-build" width="232" height="144" role="img" aria-label="Анимация генерации мира из блоков"></canvas>
+        </div>
+      </section>
+
+      <section id="failure-screen" class="status-screen failure-screen" aria-live="assertive" hidden>
+        <p data-minecraft-text data-minecraft-scale="1.5">Не удалось подключиться к серверу</p>
+        <p id="failure-reason" data-minecraft-text data-minecraft-scale="1.5">Неверный X-API ключ</p>
+        <button id="failure-back" class="pixel-button" type="button" data-minecraft-text data-minecraft-scale="1.5">К вводу ключа</button>
       </section>
 
       <section id="menu-screen" class="menu-screen" aria-labelledby="menu-title" hidden>

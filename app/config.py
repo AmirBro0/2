@@ -12,6 +12,7 @@ class Settings:
     job_timeout_sec: int
     result_ttl_sec: int
     parallel_jobs: int
+    demo_key_enabled: bool = False
 
     @property
     def database_path(self) -> Path:
@@ -37,4 +38,5 @@ def load_settings() -> Settings:
         job_timeout_sec=int(os.getenv("JOB_TIMEOUT_SEC", "270")),
         result_ttl_sec=int(os.getenv("RESULT_TTL_HOURS", "24")) * 3600,
         parallel_jobs=max(1, int(os.getenv("PARALLEL_JOBS", "1"))),
+        demo_key_enabled=os.getenv("DEMO_KEY_ENABLED", "").lower() in {"1", "true", "yes"},
     )

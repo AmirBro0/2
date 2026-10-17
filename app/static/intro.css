@@ -41,6 +41,7 @@ body { min-width: 320px; min-height: 100vh; min-height: 100dvh; margin: 0; overf
   font-weight: 700;
   text-shadow: 2px 2px #242424;
 }
+.key-field { position: relative; }
 .connect-form input {
   display: block;
   width: 100%;
@@ -50,13 +51,31 @@ body { min-width: 320px; min-height: 100vh; min-height: 100dvh; margin: 0; overf
   border-radius: 0;
   outline: 2px solid #080808;
   background: #080808;
-  color: white;
+  color: transparent;
+  caret-color: transparent;
+  -webkit-text-fill-color: transparent;
   font: 20px "Courier New", Consolas, monospace;
   box-shadow: inset 2px 2px #242424;
 }
 .connect-form input:focus { border-color: #fff; }
-.connect-form input:-webkit-autofill { -webkit-box-shadow: 0 0 0 1000px #080808 inset; -webkit-text-fill-color: #fff; }
+.connect-form input:-webkit-autofill { -webkit-box-shadow: 0 0 0 1000px #080808 inset; -webkit-text-fill-color: transparent; }
 .connect-form input::selection { background: #8aa6e7; color: #111; }
+.key-visual {
+  position: absolute;
+  inset: 2px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  overflow: hidden;
+  white-space: nowrap;
+  pointer-events: none;
+  color: #fff;
+  font: 20px "Courier New", Consolas, monospace;
+}
+#key-render { flex: none; }
+.key-cursor { display: none; position: absolute; top: 28px; width: 10px; height: 2px; background: #fff; animation: cursor-blink 1s steps(1, end) infinite; }
+.key-field:focus-within .key-cursor { display: block; }
+@keyframes cursor-blink { 50% { opacity: 0; } }
 .error { margin: 9px 0 -20px; color: #ffd2c9; font-size: 14px; font-weight: 700; text-shadow: 1px 1px #111; }
 .actions { display: grid; gap: 11px; margin-top: clamp(48px, 13vh, 82px); }
 .pixel-button {
@@ -81,6 +100,24 @@ body { min-width: 320px; min-height: 100vh; min-height: 100dvh; margin: 0; overf
 }
 .pixel-button:active { background: #777; box-shadow: inset 2px 2px #444, inset -2px -2px #bbb; transform: translateY(1px); }
 .pixel-button:disabled { opacity: .7; cursor: wait; }
+
+.status-screen {
+  width: min(100% - 40px, 430px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 38px;
+  text-align: center;
+}
+.status-screen p { margin: 0; font-size: 16px; text-shadow: 2px 2px #202020; }
+.status-screen .pixel-button { width: min(100%, 266px); min-height: 28px; padding: 3px 8px; font-size: 15px; }
+.failure-screen { gap: 20px; }
+.failure-screen .pixel-button { margin-top: 2px; }
+.loading-content { width: min(100%, 266px); display: flex; flex-direction: column; align-items: center; }
+.load-track { width: 100%; height: 4px; margin-top: 5px; background: #080808; box-shadow: 0 1px rgba(255,255,255,.2); }
+.load-progress { width: 0; height: 2px; background: #40df39; box-shadow: 0 0 3px #51ed44; }
+.world-build { display: block; width: 232px; height: 144px; margin-top: 12px; image-rendering: pixelated; filter: drop-shadow(3px 3px 0 #111); }
 
 .menu-screen {
   width: min(100% - 40px, 430px);
