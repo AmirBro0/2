@@ -108,7 +108,7 @@ form.addEventListener("submit", async (event) => {
     data.append("file", file);
     const response = await fetch("/api/v1/analyze", {
       method: "POST",
-      headers: { "X-API-Key": apiKey },
+      headers: { "X-API-Key": apiKey, Prefer: "respond-async" },
       body: data,
     });
     if (!response.ok) {
