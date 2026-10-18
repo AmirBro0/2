@@ -4,6 +4,8 @@ import asyncio
 import hmac
 import json
 import uuid
+import time
+import importlib
 
 from fastapi import Depends, FastAPI, File, Header, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
@@ -90,9 +92,34 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             and settings.analyzer_entrypoint != "app.analyzers.unconfigured:analyze_video"
         }
 
+    @app.get("/api/v1/connection", dependencies=[Depends(require_api_key)])
+    def connection():
+        baseline = settings.analyzer_entrypoint == "app.analyzers.oko:analyze_video"
+        ready = settings.analyzer_entrypoint != "app.analyzers.unconfigured:analyze_video"
+        reason = "Модель анализа ещё не подключена. Запись сохранена в браузере."
+        if ready:
+            try:
+                module, name = settings.analyzer_entrypoint.split(":", 1)
+                if not callable(getattr(importlib.import_module(module), name)):
+                    raise ValueError("Invalid entrypoint")
+                if baseline:
+                    from app.oko.config import get_settings
+                    from app.oko.pipeline.detectors import build_detectors
+                    build_detectors(get_settings().detectors)
+                reason = "Локальный детектор обзора камеры готов. Остальные кассовые действия пока не проверяются." if baseline else "Локальный анализатор готов к обработке."
+            except Exception:
+                ready = False
+                reason = "Анализатор настроен, но не загружается. Проверьте зависимости и настройки сервера."
+        return {"server": True, "authorized": True, "ready": ready, "mode": "baseline" if baseline else "model", "message": reason, "max_upload_bytes": settings.max_upload_bytes}
+
     @app.get("/api/v1/rules")
     def rules():
         return list(rule_catalog().values())
+
+    @app.get("/api/v1/catalog")
+    def full_catalog():
+        from app.oko.rules.catalog import catalog_payload
+        return catalog_payload()
 
     @app.post("/api/v1/analyze", status_code=202, dependencies=[Depends(require_api_key)])
     async def analyze(file: UploadFile = File(...)):
@@ -131,10 +158,25 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "status": "processing" if status in ("queued", "processing") else status,
         }
         if status == "done":
-            response.update(json.loads(job["result_json"]))
+            response.update({k: v for k, v in json.loads(job["result_json"]).items() if k != "_ui"})
         elif status == "failed":
             response["error"] = job["error"]
         return JSONResponse(response)
+
+    @app.get("/api/v1/jobs/{job_id}/details", dependencies=[Depends(require_api_key)])
+    def job_details(job_id: str):
+        job = store.get(job_id)
+        if job is None:
+            raise HTTPException(404, "Job not found")
+        info = {"status": job["status"], "queue_position": store.queue_position(job_id), "elapsed_sec": round(max(0, time.time() - job["created_at"]), 1)}
+        if job["status"] == "processing":
+            try:
+                info.update(json.loads((settings.results_dir / f"{job_id}.progress.json").read_text(encoding="utf-8")))
+            except (OSError, ValueError):
+                info["stage"] = "detect"
+        if job["status"] == "done":
+            info["result"] = json.loads(job["result_json"]).get("_ui", {})
+        return info
 
     return app
 

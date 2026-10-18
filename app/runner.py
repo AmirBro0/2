@@ -48,12 +48,17 @@ class JobRunner:
         job_id = job["job_id"]
         input_path = Path(job["input_path"])
         output_path = self.settings.results_dir / f"{job_id}.json"
+        progress_path = self.settings.results_dir / f"{job_id}.progress.json"
         if not input_path.is_file():
             self.store.fail(job_id, "Uploaded video is no longer available.")
             return
 
         process = None
         try:
+            remaining = min(self.settings.job_timeout_sec, 295 - (time.time() - job["created_at"]))
+            if remaining < 1:
+                self.store.fail(job_id, "Analysis exceeded the time limit in the queue.")
+                return
             process = await asyncio.create_subprocess_exec(
                 sys.executable,
                 "-m",
@@ -64,13 +69,15 @@ class JobRunner:
                 str(output_path),
                 "--analyzer",
                 self.settings.analyzer_entrypoint,
+                "--progress", str(progress_path),
+                "--budget", str(max(1, remaining - 3)),
                 cwd=str(Path(__file__).resolve().parent.parent),
                 stdout=asyncio.subprocess.DEVNULL,
                 stderr=asyncio.subprocess.PIPE,
             )
             try:
                 _, stderr = await asyncio.wait_for(
-                    process.communicate(), timeout=self.settings.job_timeout_sec
+                    process.communicate(), timeout=remaining
                 )
             except TimeoutError:
                 process.kill()
@@ -95,9 +102,19 @@ class JobRunner:
         finally:
             input_path.unlink(missing_ok=True)
             output_path.unlink(missing_ok=True)
+            for path in (progress_path, progress_path.with_suffix(".tmp")):
+                try:
+                    path.unlink(missing_ok=True)
+                except OSError:
+                    logger.debug("Progress file is still being read: %s", path.name)
 
     def _cleanup(self) -> None:
         cutoff = time.time() - self.settings.result_ttl_sec
         for job in self.store.expired(cutoff):
             Path(job["input_path"]).unlink(missing_ok=True)
+            for suffix in (".progress.json", ".progress.tmp"):
+                try:
+                    (self.settings.results_dir / f"{job['job_id']}{suffix}").unlink(missing_ok=True)
+                except OSError:
+                    pass
             self.store.delete(job["job_id"])

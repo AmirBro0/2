@@ -1,0 +1,28 @@
+.mc-player { position:relative; background:#151216; border:4px solid #080808; box-shadow:inset 2px 2px #62566a,inset -2px -2px #201925,0 3px #080808; padding:5px; outline:none; }
+.mc-player:focus-visible { box-shadow:0 0 0 2px #e9d8ff; }
+.mc-player .video-frame { overflow:hidden; border:2px solid #080808; box-shadow:inset 2px 2px #030303; height:clamp(180px,calc(100dvh - 450px),390px); }
+.mc-player .play-recording { height:100%; padding:0; }
+.player-controls { padding:8px 6px 4px; background:#252128; }
+.player-seek-wrap { position:relative; height:23px; margin:0 4px 7px; }
+.xp-track { position:absolute; inset:8px 0 5px; background:url('/static/minecraft-local/ui/xp_background.png') center/100% 100%; image-rendering:pixelated; }
+#player-xp { height:100%; width:0; background:url('/static/minecraft-local/ui/xp_progress.png') left center/100% 100%; image-rendering:pixelated; }
+.player-seek { position:absolute; inset:0; width:100%; height:23px; margin:0; appearance:none; background:transparent; cursor:pointer; accent-color:#80ff20; }
+.player-seek::-webkit-slider-thumb { appearance:none; width:7px; height:17px; background:#eaffb0; border:2px solid #162400; box-shadow:1px 1px #000; }
+.player-seek::-moz-range-thumb { width:5px; height:13px; background:#eaffb0; border:2px solid #162400; border-radius:0; }
+.player-seek:disabled { opacity:.4; cursor:default; }
+.player-seek:focus-visible { outline:1px solid #eaffb0; outline-offset:2px; }
+.player-toolbar { display:flex; align-items:center; gap:6px; min-height:34px; }
+.player-button { display:grid; place-items:center; flex:none; width:34px; height:32px; padding:4px; border:2px solid #080808; background:#999; box-shadow:inset 2px 2px #e5e5e5,inset -2px -2px #505050; color:#fff; text-shadow:1px 1px #222; font:14px Minecraft,monospace; }
+.player-button:hover:not(:disabled),.player-button:focus-visible { background:#8798b7; outline:1px solid #fff; outline-offset:-2px; }.player-button:active:not(:disabled) { box-shadow:inset 2px 2px #555; }
+.player-button:disabled { filter:brightness(.45); cursor:default; }.player-button svg { width:18px; height:18px; fill:currentColor; shape-rendering:crispEdges; filter:drop-shadow(1px 1px #333); }
+.player-button.speed { width:42px; }#player-time { flex:1; min-width:100px; padding-left:4px; font-size:12px; color:#e8e8e8; white-space:nowrap; text-shadow:1px 1px #111; }
+.player-volume { appearance:none; width:56px; height:8px; margin:0 4px 0 0; background:#090909; box-shadow:0 1px #777; accent-color:#a1e350; cursor:pointer; }
+.player-volume::-webkit-slider-thumb { appearance:none; width:8px; height:16px; border:2px solid #151515; background:#ddd; }
+.player-volume::-moz-range-thumb { width:6px; height:12px; border:2px solid #151515; border-radius:0; background:#ddd; }
+.player-message { font-size:12px; color:#ffde95; padding:10px 2px 3px; line-height:1.6; }
+.player-markers { position:absolute; inset:0; pointer-events:none; }.player-marker { position:absolute; top:-9px; width:10px; height:10px; transform:translateX(-50%); border:2px solid #301700; background:#ffbd4a; cursor:pointer; pointer-events:auto; padding:0; z-index:2; }.player-marker.review { background:#b59ef4; border-color:#2b1851; }.player-marker:hover { outline:2px solid #fff; }
+.player-activity { display:flex; align-items:flex-end; gap:1px; position:absolute; inset:0 0 5px; pointer-events:none; opacity:.24; }.player-activity i { flex:1; min-width:1px; background:#b2eb6c; }
+.seek-preview { position:absolute; bottom:26px; width:144px; background:#12091c; border:2px solid #6a4b8a; box-shadow:0 0 0 2px #000; padding:3px; pointer-events:none; z-index:5; text-align:center; font-size:12px; }.seek-preview img { display:block; width:100%; max-height:90px; object-fit:contain; background:#000; margin-bottom:4px; }.seek-preview img:not([src]) { display:none; }
+.mc-player:fullscreen { width:100vw; height:100vh; display:flex; flex-direction:column; justify-content:center; padding:12px; border:0; background:#050505; }.mc-player:fullscreen .video-frame { flex:1; min-height:0; height:auto; }.mc-player:fullscreen .player-controls { flex:none; }
+.mc-player.theater { position:fixed; inset:0; z-index:80; display:flex; flex-direction:column; padding:12px; }.mc-player.theater .video-frame { flex:1; height:auto; min-height:0; }
+@media(max-width:560px) { .player-toolbar { gap:4px; flex-wrap:wrap; }.player-button { width:30px; height:30px; }#player-time { font-size:11px; min-width:96px; }.player-volume { display:none; }.player-button.skip { display:none; }.mc-player .video-frame { height:34vh; min-height:180px; }.mc-player { padding:3px; }.player-controls { padding:8px 3px 3px; } }

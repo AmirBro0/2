@@ -1,0 +1,11 @@
+@font-face { font-family:Minecraft; src:url('/static/minecraft-local/font/minecraft.ttf') format('truetype'); font-display:swap; }
+.game-sound-toggle { position:fixed; left:16px; bottom:16px; z-index:26; padding:8px 12px; color:#ccc; background:#080808b0; border:2px solid #5c5c5c; font:12px Minecraft,monospace; text-shadow:1px 1px #111; cursor:pointer; }
+.game-sound-toggle:hover,.game-sound-toggle:focus-visible { color:#ffffa0; border-color:#fff; }
+.game-achievement { position:fixed; z-index:100; right:16px; top:16px; width:min(340px,calc(100vw - 32px)); min-height:76px; display:flex; align-items:center; gap:14px; padding:12px 18px; border:3px solid #080808; background:#242424; box-shadow:inset 2px 2px #737373,inset -2px -2px #0f0f0f,0 3px #0009; font:13px/1.5 Minecraft,monospace; color:#fff; text-shadow:1px 1px #111; animation:achievement-enter .22s steps(8); pointer-events:none; }
+.game-achievement[hidden] { display:none; }.game-achievement img { width:32px; height:32px; image-rendering:pixelated; }.game-achievement span { display:block; }.game-achievement span:first-child { color:#ffff55; margin-bottom:5px; }
+@keyframes achievement-enter { from { transform:translateX(110%); } }
+.portal-transition { position:fixed; inset:0; z-index:200; pointer-events:all; background:repeating-conic-gradient(#63259ac9 0 25%,#29113ece 0 50%) 0 0/100px 100px; box-shadow:inset 0 0 180px 80px #180221; animation:portal-enter .65s steps(12) forwards; }
+@keyframes portal-enter { from { opacity:0; background-size:20px 20px; } to { opacity:1; background-size:160px 160px; } }
+.mc-button,.pixel-button { transition:filter 80ms; }.mc-button:active:not(:disabled),.pixel-button:active:not(:disabled) { filter:brightness(.85); }
+.modal { font-family:Minecraft,monospace; }.modal label { font-weight:normal; }
+@media(prefers-reduced-motion:reduce) { .game-achievement,.portal-transition { animation:none; } }

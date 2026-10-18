@@ -12,6 +12,11 @@ from zipfile import ZipFile
 
 DESTINATION = Path(__file__).resolve().parents[1] / "app" / "static" / "minecraft-local" / "inventory"
 ASSETS = {
+    "end_sky.png": "textures/environment/end_sky.png",
+    "end_stone.png": "textures/block/end_stone.png",
+    "obsidian.png": "textures/block/obsidian.png",
+    "purple_background.png": "textures/gui/sprites/boss_bar/purple_background.png",
+    "purple_progress.png": "textures/gui/sprites/boss_bar/purple_progress.png",
     "inventory.png": "textures/gui/container/inventory.png",
     "slot.png": "textures/gui/sprites/container/slot.png",
     "slot_highlight_front.png": "textures/gui/sprites/container/slot_highlight_front.png",

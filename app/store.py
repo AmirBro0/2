@@ -60,7 +60,7 @@ class JobStore:
         with self._connect() as conn:
             conn.execute("BEGIN IMMEDIATE")
             row = conn.execute(
-                "SELECT job_id, input_path FROM jobs WHERE status = 'queued' "
+                "SELECT job_id, input_path, created_at FROM jobs WHERE status = 'queued' "
                 "ORDER BY created_at LIMIT 1"
             ).fetchone()
             if row:
@@ -69,6 +69,13 @@ class JobStore:
                     (time.time(), row["job_id"]),
                 )
         return dict(row) if row else None
+
+    def queue_position(self, job_id: str) -> int:
+        with self._connect() as conn:
+            row = conn.execute("SELECT created_at, status FROM jobs WHERE job_id = ?", (job_id,)).fetchone()
+            if not row or row["status"] != "queued":
+                return 0
+            return conn.execute("SELECT count(*) FROM jobs WHERE status = 'queued' AND created_at <= ?", (row["created_at"],)).fetchone()[0]
 
     def complete(self, job_id: str, result: dict) -> None:
         with self._connect() as conn:

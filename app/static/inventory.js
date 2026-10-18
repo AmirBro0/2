@@ -25,6 +25,8 @@ worldReference.src = `${assetRoot}world_reference.png`;
 const keyStorage = "fortebank-api-key";
 const state = {
   file: null,
+  contextId: null,
+  savingFile: false,
   key: sessionStorage.getItem(keyStorage) || "",
   keyPlaced: false,
   tooltips: localStorage.getItem("inventory-tooltips") !== "off",
@@ -178,7 +180,7 @@ const character = new window.InventoryCharacter(avatar, state.followCursor);
 const recipeSteps = [
   { id: "video", category: "video", image: "ender_pearl", name: "Видеофайл", value: "Выбрать запись .mov", instruction: "Нажмите на эндер-жемчуг внизу и выберите видеофайл .mov." },
   { id: "key", category: "key", image: "blaze_powder", name: "Ключ", value: "Добавить X-API ключ", instruction: "Нажмите на огненный порошок: ключ займёт нижнюю правую ячейку создания.", craftable: true },
-  { id: "change", category: "key", image: "blaze_rod", name: "Сменить ключ", value: "Выбрать другой X-API ключ", instruction: "Огненный стержень откроет поле для другого X-API ключа." },
+  { id: "change", category: "key", image: "blaze_rod", name: "Сменить ключ", value: "Выбрать другой X-API ключ", instruction: "Огненный стержень вернёт на первый экран для ввода другого ключа. Выбранная запись сохранится." },
   { id: "next", category: "other", image: "ender_eye", name: "Следующий шаг", value: "Открыть следующий этап", instruction: "Когда жемчуг и порошок окажутся в ячейках, появится Око Эндера.", craftable: true },
   { id: "settings", category: "other", image: "command_block", name: "Настройки", value: "Открыть настройки", instruction: "Командный блок открывает настройки подсказок и поворота персонажа." },
   { id: "dragon", category: "other", image: "dragon_head", name: "Голова дракона", value: "Назначение появится позже", instruction: "Назначение головы дракона появится на следующем этапе." },
@@ -348,87 +350,12 @@ async function validateKey(key) {
   return response.status;
 }
 
-function openKeyModal() {
-  openModal("X-API ключ");
-  const label = document.createElement("label");
-  label.htmlFor = "new-api-key";
-  modalContent.append(label);
-  setText(label, "Введите ключ", 1.5);
-  const input = document.createElement("input");
-  input.id = "new-api-key";
-  input.type = "text";
-  input.autocomplete = "off";
-  input.spellcheck = false;
-  input.value = state.key;
-  const keyField = document.createElement("div");
-  keyField.className = "modal-key-field";
-  const keyVisual = document.createElement("div");
-  keyVisual.className = "modal-key-visual";
-  keyVisual.setAttribute("aria-hidden", "true");
-  const keyRender = document.createElement("span");
-  keyRender.className = "modal-key-render";
-  const keyCursor = document.createElement("span");
-  keyCursor.className = "modal-key-cursor";
-  keyVisual.append(keyRender, keyCursor);
-  keyField.append(input, keyVisual);
-  modalContent.append(keyField);
-  function renderInput() {
-    if (!font) return;
-    input.classList.add("bitmap-ready");
-    setText(keyRender, input.value, 1.5);
-    const position = input.selectionStart ?? input.value.length;
-    const totalWidth = font.widthOf(input.value) * 1.5;
-    const cursorX = font.widthOf(input.value.slice(0, position)) * 1.5;
-    const offset = Math.max(0, totalWidth - keyVisual.clientWidth + 16);
-    keyRender.style.transform = `translateX(${-offset}px)`;
-    keyCursor.style.left = `${cursorX - offset}px`;
-  }
-  for (const eventName of ["input", "click", "keyup", "select"]) input.addEventListener(eventName, renderInput);
-  renderInput();
-  const error = document.createElement("p");
-  error.className = "error";
-  error.setAttribute("role", "alert");
-  error.hidden = true;
-  modalContent.append(error);
-  async function save() {
-    const key = input.value.trim();
-    if (!key) {
-      setText(error, "Введите X-API ключ", 1.5);
-      error.hidden = false;
-      return;
-    }
-    saveButton.disabled = true;
-    try {
-      const status = await validateKey(key);
-      if (status !== 200) {
-        setText(error, status === 401 ? "Неверный X-API ключ" : "Сервер не отвечает", 1.5);
-        error.hidden = false;
-        return;
-      }
-      state.key = key;
-      state.keyPlaced = false;
-      sessionStorage.setItem(keyStorage, key);
-      document.querySelector("#powder-button").dataset.detail = "Добавить X-API ключ в создание";
-      craftKey.replaceChildren();
-      craftKey.setAttribute("aria-label", "Ключ не добавлен");
-      updateResult();
-      closeModal();
-      showToast("Ключ принят. Добавьте порошок в создание");
-    } catch {
-      setText(error, "Локальный сервер не отвечает", 1.5);
-      error.hidden = false;
-    } finally {
-      saveButton.disabled = false;
-    }
-  }
-  input.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") { event.preventDefault(); save(); }
-  });
-  const saveButton = modalButton("Сохранить", save);
-  modalButton("Отмена", closeModal);
-  input.focus();
-  input.setSelectionRange(input.value.length, input.value.length);
-  renderInput();
+function returnToKeyScreen() {
+  if (state.savingFile) { showToast("Подождите, запись сохраняется"); return; }
+  sessionStorage.removeItem(keyStorage);
+  sessionStorage.removeItem("fortebank-craft-ready");
+  sessionStorage.removeItem("fortebank-review-job");
+  window.location.assign("/");
 }
 
 function icon(name) {
@@ -469,7 +396,7 @@ async function flyItem(source, destination, name) {
 }
 
 function updateResult() {
-  const ready = Boolean(state.file && state.keyPlaced);
+  const ready = Boolean(state.file && state.keyPlaced && !state.savingFile);
   craftResult.hidden = !ready;
   craftResult.classList.toggle("ready", ready);
 }
@@ -486,7 +413,21 @@ filePicker.addEventListener("change", async () => {
     showToast("Выберите видеофайл .mov");
     return;
   }
+  if (!file.size) { showToast("Этот файл пуст"); return; }
+  if (state.savingFile) return;
+  state.savingFile = true;
+  updateResult();
+  try {
+    state.contextId = await window.VideoTransfer.save(file);
+  } catch {
+    state.savingFile = false;
+    updateResult();
+    showToast("Не удалось сохранить запись в браузере. Освободите место и повторите.");
+    return;
+  }
   state.file = file;
+  state.savingFile = false;
+  sessionStorage.removeItem("fortebank-craft-ready");
   craftFile.replaceChildren();
   await flyItem(document.querySelector("#pearl-button"), craftFile, "ender_pearl");
   craftFile.append(icon("ender_pearl"));
@@ -499,10 +440,10 @@ filePicker.addEventListener("change", async () => {
 
 document.querySelector("#powder-button").addEventListener("click", async () => {
   tooltip.hidden = true;
-  if (!state.key) { openKeyModal(); return; }
+  if (!state.key) { returnToKeyScreen(); return; }
   try {
     if (await validateKey(state.key) !== 200) {
-      openKeyModal();
+      returnToKeyScreen();
       return;
     }
   } catch {
@@ -518,11 +459,12 @@ document.querySelector("#powder-button").addEventListener("click", async () => {
   state.keyPlaced = true;
   updateResult();
   showToast(state.file ? "Создано Око Эндера" : "Ключ добавлен. Выберите видеофайл");
+  if (state.file) window.GameUI?.notify("Око Эндера создано", "Нажмите на Око, чтобы перейти к проверке", true);
 });
 
 bindTooltip(craftFile);
 bindTooltip(craftKey);
-document.querySelector("#rod-button").addEventListener("click", openKeyModal);
+document.querySelector("#rod-button").addEventListener("click", returnToKeyScreen);
 document.querySelector("#dragon-button").addEventListener("click", () => openInfo("Голова дракона", [
   "Назначение этого предмета появится на следующем этапе.",
 ]));
@@ -549,10 +491,51 @@ document.querySelector("#settings-button").addEventListener("click", () => {
   });
   modalButton("Готово", closeModal).focus();
 });
-craftResult.addEventListener("click", () => openInfo("Око Эндера", [
-  "Файл и ключ готовы. Следующая страница проверки появится позже.",
-]));
+craftResult.addEventListener("click", async () => {
+  if (!state.file || !state.keyPlaced || craftResult.disabled) return;
+  craftResult.disabled = true;
+  tooltip.hidden = true;
+  try {
+    const saved = await window.VideoTransfer.load();
+    if (!saved || saved.id !== state.contextId) state.contextId = await window.VideoTransfer.save(state.file);
+    sessionStorage.setItem(keyStorage, state.key);
+    sessionStorage.setItem("fortebank-craft-ready", state.contextId);
+    await window.GameUI?.portal();
+    window.location.assign("/review");
+  } catch {
+    craftResult.disabled = false;
+    showToast("Не удалось перенести файл. Освободите место в браузере и повторите.");
+  }
+});
 
 if (!state.key) {
   document.querySelector("#powder-button").dataset.detail = "Сначала выберите X-API ключ";
 }
+
+window.addEventListener("pageshow", () => {
+  craftResult.disabled = false;
+  const currentKey = sessionStorage.getItem(keyStorage) || "";
+  if (state.key !== currentKey) {
+    state.key = currentKey;
+    state.keyPlaced = false;
+    craftKey.replaceChildren();
+    craftKey.setAttribute("aria-label", "Ключ не добавлен");
+    craftKey.dataset.detail = "Добавить X-API ключ в создание";
+    updateResult();
+  }
+});
+window.VideoTransfer.load().then((context) => {
+  if (!context || state.file || state.savingFile) return;
+  state.file = context.file;
+  state.contextId = context.id;
+  craftFile.replaceChildren(icon("ender_pearl"));
+  craftFile.setAttribute("aria-label", `Выбран файл ${state.file.name}`);
+  craftFile.dataset.detail = state.file.name;
+  state.keyPlaced = Boolean(state.key && sessionStorage.getItem("fortebank-craft-ready") === context.id);
+  if (state.keyPlaced) {
+    craftKey.replaceChildren(icon("blaze_powder"));
+    craftKey.setAttribute("aria-label", "X-API ключ добавлен");
+    craftKey.dataset.detail = "X-API ключ добавлен";
+  }
+  updateResult();
+}).catch(() => showToast("Не удалось восстановить предыдущую запись"));

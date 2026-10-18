@@ -1,53 +1,81 @@
 <!doctype html>
 <html lang="ru">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Проверка кассовых операций по видео</title>
-    <link rel="stylesheet" href="/static/styles.css" />
-    <script src="/static/app.js" defer></script>
-  </head>
-  <body>
-    <main class="container">
-      <header class="header">
-        <p class="eyebrow">ForteBank · Datathon 26</p>
-        <h1>Проверка кассовых операций по видео</h1>
-        <p class="intro">Загрузите запись. Сервис покажет возможные нарушения, время события и кадры для проверки человеком.</p>
-      </header>
-
-      <section id="readiness-panel" class="panel notice hidden" aria-live="polite">
-        <p id="readiness-text"></p>
-      </section>
-
-      <section class="panel" aria-labelledby="upload-title">
-        <h2 id="upload-title">Новое видео</h2>
-        <form id="upload-form">
-          <label for="api-key">Ключ доступа</label>
-          <input id="api-key" type="password" autocomplete="off" required placeholder="Введите X-API-Key" />
-          <label for="video-file">Видеофайл .mov</label>
-          <input id="video-file" type="file" accept=".mov,video/quicktime" required />
-          <p class="hint">Максимальный размер файла зависит от настройки сервера. Анализ выполняется локально.</p>
-          <button id="submit-button" type="submit" disabled>Начать проверку</button>
-        </form>
-      </section>
-
-      <section id="preview-panel" class="panel preview hidden" aria-labelledby="preview-title">
-        <h2 id="preview-title">Загруженное видео</h2>
-        <video id="video-preview" controls playsinline preload="metadata"></video>
-        <p id="preview-note" class="hint">Видео открывается из выбранного файла в вашем браузере.</p>
-      </section>
-
-      <section id="status-panel" class="panel hidden" aria-live="polite">
-        <h2>Статус</h2>
-        <p id="status-text"></p>
-      </section>
-
-      <section id="result-panel" class="panel hidden" aria-live="polite">
-        <h2>Результат</h2>
-        <p id="verdict" class="verdict"></p>
-        <div id="violations"></div>
-        <p class="hint">Результат помогает проверяющему найти фрагмент; окончательное решение принимает человек.</p>
-      </section>
-    </main>
-  </body>
-</html>
+<head>
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Энд · Проверка кассовых операций по видео</title>
+<link rel="stylesheet" href="/static/end.css" />
+<link rel="stylesheet" href="/static/game-ui.css" /><link rel="stylesheet" href="/static/player.css" />
+<script src="/static/game-ui.js" defer></script><script src="/static/video-transfer.js" defer></script><script src="/static/player.js" defer></script><script src="/static/app.js" defer></script>
+</head>
+<body>
+<div class="end-world" aria-hidden="true"></div>
+<div class="end-particles" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<main class="end-screen">
+  <header id="status-panel" class="boss-hud" aria-live="polite">
+    <h1 id="status-heading">Энд</h1>
+    <div id="boss-progress" class="boss-progress" role="progressbar" aria-label="Проверка записи"><div id="boss-fill"></div></div>
+    <p id="status-text" role="status">Переход в Энд…</p><span id="elapsed" hidden></span>
+  </header>
+  <section id="missing-context" class="missing-context" hidden>
+    <img src="/static/minecraft-local/inventory/items/ender_eye.png" alt="" />
+    <h2>Войдите через Око Эндера</h2>
+    <p id="missing-message">Запись и ключ переносятся из инвентаря.</p>
+    <a class="mc-button" href="/app">Вернуться в инвентарь</a>
+  </section>
+  <section id="review-stage" class="review-stage" aria-label="Выбранная запись" hidden>
+    <div class="record-label"><span id="file-name"></span><span id="video-format">.MOV</span><span id="file-size"></span></div>
+    <div id="mc-player" class="mc-player" tabindex="0" role="region" aria-label="Игровой видеоплеер. Пробел — пауза, стрелки — перемотка, F — полный экран">
+    <div class="video-frame">
+      <video id="video-preview" playsinline muted preload="metadata"></video>
+      <button id="play-recording" class="play-recording" type="button"><img src="/static/minecraft-local/inventory/items/ender_eye.png" alt="" /><span>Смотреть запись</span><small>Видео уже перенесено из инвентаря</small></button>
+      <div id="video-fallback" class="video-fallback" hidden><img src="/static/minecraft-local/inventory/items/ender_eye.png" alt="" /><p>Предпросмотр этого кодека недоступен</p><span>Проверка записи работает независимо от проигрывателя.</span></div>
+    </div>
+    <div class="player-controls">
+      <div id="player-seek-wrap" class="player-seek-wrap">
+        <div id="player-activity" class="player-activity" aria-hidden="true"></div>
+        <div class="xp-track"><div id="player-xp"></div></div>
+        <div id="player-markers" class="player-markers" aria-label="События на записи"></div>
+        <input id="player-seek" class="player-seek" type="range" min="0" max="100" step="0.1" value="0" aria-label="Позиция в видео" disabled />
+        <div id="seek-preview" class="seek-preview" hidden><img alt="Предпросмотр момента" /><span>00:00</span></div>
+      </div>
+      <div class="player-toolbar">
+        <button id="player-play" class="player-button" type="button" aria-label="Воспроизвести" data-tip="Пауза / воспроизведение · Пробел" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><path id="player-play-icon" d="M4 2h3v2h3v2h3v4h-3v2H7v2H4z" /></svg></button>
+        <button id="player-back" class="player-button skip" type="button" aria-label="Назад на 5 секунд" data-tip="Назад на 5 секунд · ←" disabled>-5</button>
+        <button id="player-forward" class="player-button skip" type="button" aria-label="Вперёд на 5 секунд" data-tip="Вперёд на 5 секунд · →" disabled>+5</button>
+        <output id="player-time">00:00 / 00:00</output>
+        <button id="player-mute" class="player-button" type="button" aria-label="Включить звук видео" data-tip="Звук видео · M" aria-pressed="true"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 6h3V4h2V2h2v12H6v-2H4v-2H1z" /><path id="player-volume-icon" d="M10 4h2v2h2V4h2v2h-2v4h2v2h-2v-2h-2v2h-2v-2h2V6h-2z" /></svg></button>
+        <input id="player-volume" class="player-volume" type="range" min="0" max="1" step="0.05" value="0" aria-label="Громкость видео" />
+        <button id="player-speed" class="player-button speed" type="button" aria-label="Скорость воспроизведения: 1×" data-tip="Изменить скорость воспроизведения">1×</button>
+        <button id="player-fullscreen" class="player-button" type="button" aria-label="Полный экран" data-tip="Полный экран · F"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 1h5v2H3v3H1zM10 1h5v5h-2V3h-3zM1 10h2v3h3v2H1zM13 10h2v5h-5v-2h3z" /></svg></button>
+      </div>
+      <p id="player-message" class="player-message" role="status" hidden></p>
+    </div>
+    </div>
+    <p id="preview-note" class="preview-note">Запись и ключ получены из инвентаря.</p>
+    <div id="event-timeline" class="timeline" aria-label="Моменты событий" hidden></div>
+    <section id="error-panel" role="alert" class="error-panel" hidden><p id="error-text"></p></section>
+    <nav class="actions" aria-label="Действия с проверкой">
+      <a class="mc-button" href="/app">В инвентарь</a>
+      <button id="refresh-readiness" class="mc-button" type="button" hidden>Проверить подключение</button>
+      <button id="resume-check" class="mc-button" type="button" hidden>Повторить проверку</button>
+      <button id="open-result" class="mc-button" type="button" disabled>Результат проверки</button>
+    </nav>
+  </section>
+  <button id="open-rules" class="book-button" type="button" aria-label="Правила проверки" data-tip="Правила проверки" hidden></button>
+</main>
+<div id="item-tooltip" role="tooltip" hidden></div>
+<dialog id="report-dialog" class="report-dialog" aria-labelledby="result-title">
+  <header class="report-heading"><h2 id="result-title">Результат проверки</h2><button id="close-report" class="mc-button small" type="button">К видео</button></header>
+  <div class="report-content"><section id="result-panel" hidden>
+    <div id="result-summary" class="result-summary"><img id="result-icon" src="/static/minecraft-local/inventory/items/ender_eye.png" alt="" /><div><p id="verdict" class="verdict"></p><p id="result-detail" class="muted"></p></div></div>
+    <p id="analysis-scope" class="analysis-scope" hidden></p>
+    <div id="analysis-meta" class="analysis-meta"></div>
+    <nav id="report-tabs" class="report-tabs" aria-label="Категории событий" hidden><button id="show-findings" class="mc-button small" aria-pressed="true" type="button">События</button><button id="show-review" class="mc-button small" aria-pressed="false" type="button">На проверку человеком</button></nav>
+    <div id="violations"></div><div id="review-candidates" hidden></div><p class="result-footnote">Окончательную оценку события даёт человек.</p>
+  </section></div>
+  <footer><button id="export-report" class="mc-button" type="button">Скачать JSON</button><button id="export-html" class="mc-button" type="button">Сохранить отчёт</button></footer>
+</dialog>
+<dialog id="rules-dialog" class="report-dialog" aria-labelledby="rules-title"><header class="report-heading"><h2 id="rules-title">Книга правил</h2><button id="close-rules" class="mc-button small" type="button">Назад</button></header><div class="catalog-search"><input id="rules-search" type="search" placeholder="Поиск правила…" aria-label="Поиск правила" /><span id="rules-count"></span></div><div class="report-content"><div id="rules-list">Загружаем источники…</div><p class="result-footnote">Обработка выполняется локально, без анализа звука и идентификации лиц.</p></div></dialog>
+<dialog id="connection-dialog" class="connection-dialog" aria-labelledby="connection-title"><h2 id="connection-title">Подключение к серверу</h2><ul id="connection-checks"></ul><p id="connection-message" role="status"></p><button id="close-connection" class="mc-button" type="button">Готово</button></dialog>
+<dialog id="frame-dialog" aria-label="Кадр события"><button id="close-frame" class="mc-button small" type="button">Закрыть</button><img id="full-frame" alt="" /><p id="frame-caption"></p></dialog>
+</body></html>

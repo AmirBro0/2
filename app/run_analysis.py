@@ -127,9 +127,14 @@ def main() -> None:
     parser.add_argument("--input", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--analyzer", required=True)
+    parser.add_argument("--progress", type=Path)
+    parser.add_argument("--budget", type=float, default=240)
     args = parser.parse_args()
     analyzer = load_analyzer(args.analyzer)
-    result = build_result(args.input, analyzer)
+    if args.analyzer == "app.analyzers.oko:analyze_video":
+        result = analyzer(args.input, progress_path=args.progress, budget=args.budget)
+    else:
+        result = build_result(args.input, analyzer)
     args.output.write_text(json.dumps(result, ensure_ascii=False), encoding="utf-8")
 
 

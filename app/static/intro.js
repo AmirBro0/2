@@ -286,8 +286,13 @@ form.addEventListener("submit", async (event) => {
       return;
     }
     showScreen(loadingScreen);
+    window.GameUI?.sound("pop", .18);
     await animateWorld(2600, controller.signal);
     if (!controller.signal.aborted) {
+      if (sessionStorage.getItem("fortebank-api-key") !== key) {
+        sessionStorage.removeItem("fortebank-craft-ready");
+        sessionStorage.removeItem("fortebank-review-job");
+      }
       sessionStorage.setItem("fortebank-api-key", key);
       window.location.assign("/app");
     }
