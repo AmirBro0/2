@@ -19,9 +19,9 @@ const modalContent = document.querySelector("#modal-content");
 const modalActions = document.querySelector("#modal-actions");
 const toastElement = document.querySelector("#toast");
 const assetRoot = "/static/minecraft-local/inventory/";
-const hotbarReference = new Image();
-hotbarReference.onload = () => inventory.classList.add("has-hotbar-reference");
-hotbarReference.src = `${assetRoot}hotbar_reference.png`;
+const worldReference = new Image();
+worldReference.onload = () => document.body.classList.add("has-world-reference");
+worldReference.src = `${assetRoot}world_reference.png`;
 const keyStorage = "fortebank-api-key";
 const state = {
   file: null,
@@ -221,27 +221,30 @@ requestAnimationFrame(animateAvatar);
 
 const recipeSteps = [
   { id: "video", category: "video", image: "ender_pearl", name: "Видеофайл", value: "Выбрать запись .mov", instruction: "Нажмите на эндер-жемчуг внизу и выберите видеофайл .mov." },
-  { id: "key", category: "key", image: "blaze_powder", name: "Ключ", value: "Добавить X-API ключ", instruction: "Нажмите на огненный порошок: ключ займёт нижнюю правую ячейку создания." },
+  { id: "key", category: "key", image: "blaze_powder", name: "Ключ", value: "Добавить X-API ключ", instruction: "Нажмите на огненный порошок: ключ займёт нижнюю правую ячейку создания.", craftable: true },
   { id: "change", category: "key", image: "blaze_rod", name: "Сменить ключ", value: "Выбрать другой X-API ключ", instruction: "Огненный стержень откроет поле для другого X-API ключа." },
-  { id: "next", category: "other", image: "ender_eye", name: "Следующий шаг", value: "Открыть следующий этап", instruction: "Когда жемчуг и порошок окажутся в ячейках, появится Око Эндера." },
+  { id: "next", category: "other", image: "ender_eye", name: "Следующий шаг", value: "Открыть следующий этап", instruction: "Когда жемчуг и порошок окажутся в ячейках, появится Око Эндера.", craftable: true },
   { id: "settings", category: "other", image: "command", name: "Настройки", value: "Открыть настройки", instruction: "Командный блок открывает настройки подсказок и поворота персонажа." },
   { id: "dragon", category: "other", image: "dragon", name: "Голова дракона", value: "Назначение появится позже", instruction: "Назначение головы дракона появится на следующем этапе." },
 ];
 let selectedRecipe = null;
 let recipeCategory = "all";
+let craftableOnly = true;
 
 function renderRecipeInstructions() {
   recipeInstructions.replaceChildren();
+  if (!selectedRecipe && !recipeGrid.children.length) {
+    recipeInstructions.hidden = false;
+    setText(recipeInstructions, "Ничего не найдено", 1, 124);
+    return;
+  }
+  recipeInstructions.hidden = !selectedRecipe;
+  if (!selectedRecipe) return;
   const heading = document.createElement("strong");
   const paragraph = document.createElement("p");
   recipeInstructions.append(heading, paragraph);
-  if (selectedRecipe) {
-    setText(heading, selectedRecipe.name, 1, 124);
-    setText(paragraph, selectedRecipe.instruction, 1, 124);
-  } else {
-    setText(heading, "Как начать", 1, 124);
-    setText(paragraph, "1. Жемчуг — выберите .mov. 2. Порошок — добавьте ключ. 3. Око — следующий этап.", 1, 124);
-  }
+  setText(heading, selectedRecipe.name, 1, 124);
+  setText(paragraph, selectedRecipe.instruction, 1, 124);
 }
 
 function recipeIcon(step) {
@@ -261,6 +264,7 @@ function renderRecipeGrid() {
   const query = recipeSearch.value.trim().toLocaleLowerCase("ru");
   const visible = recipeSteps.filter((step) =>
     (recipeCategory === "all" || step.category === recipeCategory)
+    && (!craftableOnly || step.craftable)
     && (!query || `${step.name} ${step.value} ${step.instruction}`.toLocaleLowerCase("ru").includes(query)),
   );
   for (const step of visible) {
@@ -272,7 +276,7 @@ function renderRecipeGrid() {
     if (selectedRecipe?.id === step.id) button.classList.add("selected");
     button.append(recipeIcon(step));
     button.addEventListener("click", () => {
-      selectedRecipe = step;
+      selectedRecipe = selectedRecipe?.id === step.id ? null : step;
       renderRecipeGrid();
       renderRecipeInstructions();
     });
@@ -281,8 +285,7 @@ function renderRecipeGrid() {
   }
   if (!visible.length) {
     selectedRecipe = null;
-    recipeInstructions.replaceChildren();
-    setText(recipeInstructions, "Ничего не найдено", 1, 124);
+    renderRecipeInstructions();
   } else if (selectedRecipe && !visible.includes(selectedRecipe)) {
     selectedRecipe = null;
     renderRecipeInstructions();
@@ -303,13 +306,14 @@ function toggleRecipeBook(force) {
 
 guideButton.addEventListener("click", () => toggleRecipeBook());
 recipeSearch.addEventListener("input", renderRecipeGrid);
-document.querySelector("#recipe-clear").addEventListener("click", () => {
-  recipeSearch.value = "";
-  recipeCategory = "all";
-  document.querySelectorAll(".recipe-tab").forEach((tab) => tab.classList.toggle("selected", tab.dataset.category === "all"));
+const recipeFilter = document.querySelector("#recipe-filter");
+recipeFilter.addEventListener("click", () => {
+  craftableOnly = !craftableOnly;
+  recipeFilter.classList.toggle("enabled", craftableOnly);
+  recipeFilter.setAttribute("aria-pressed", String(craftableOnly));
+  recipeFilter.setAttribute("aria-label", craftableOnly ? "Показать все действия" : "Показать доступные действия");
   renderRecipeGrid();
   renderRecipeInstructions();
-  recipeSearch.focus();
 });
 document.querySelectorAll(".recipe-tab").forEach((tab) => tab.addEventListener("click", () => {
   recipeCategory = tab.dataset.category;
@@ -319,6 +323,33 @@ document.querySelectorAll(".recipe-tab").forEach((tab) => tab.addEventListener("
 }));
 renderRecipeGrid();
 renderRecipeInstructions();
+
+const hotbarButtons = [...document.querySelectorAll(".hotbar .slot-button")];
+const hotbarSelection = document.querySelector("#hotbar-selection");
+const slotAnnouncement = document.querySelector("#selected-slot-announcement");
+let selectedSlot = 0;
+function selectHotbarSlot(index) {
+  selectedSlot = index;
+  hotbarSelection.hidden = false;
+  hotbarSelection.style.left = `${7 + 18 * index}px`;
+  hotbarButtons.forEach((button, buttonIndex) => {
+    if (buttonIndex === index) button.setAttribute("aria-current", "true");
+    else button.removeAttribute("aria-current");
+  });
+  slotAnnouncement.textContent = `Слот ${index + 1}: ${hotbarButtons[index]?.getAttribute("aria-label") || "пусто"}`;
+}
+hotbarButtons.forEach((button, index) => button.addEventListener("pointerdown", () => selectHotbarSlot(index)));
+
+document.addEventListener("keydown", (event) => {
+  if (!backdrop.hidden || event.altKey || event.ctrlKey || event.metaKey) return;
+  if (event.target instanceof HTMLElement && (event.target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName))) return;
+  if (/^[1-9]$/.test(event.key)) {
+    selectHotbarSlot(Number(event.key) - 1);
+    event.preventDefault();
+  } else if (event.key === "Enter" && document.activeElement === document.body) {
+    hotbarButtons[selectedSlot]?.click();
+  }
+});
 
 let focusBeforeModal = null;
 function closeModal() {

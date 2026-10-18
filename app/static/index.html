@@ -15,11 +15,11 @@
         <div id="recipe-panel-wrap" class="recipe-panel-wrap" hidden>
           <aside id="recipe-panel" class="recipe-panel" aria-label="Справочник">
             <button class="recipe-tab selected" type="button" style="top:0px" data-category="all" aria-label="Все действия"><img src="/static/minecraft-local/inventory/compass.png" alt="" /></button>
-            <button class="recipe-tab" type="button" style="top:27px" data-category="video" aria-label="Видео"><img src="/static/minecraft-local/inventory/bricks.png" alt="" /></button>
-            <button class="recipe-tab" type="button" style="top:54px" data-category="key" aria-label="Ключ"><img src="/static/minecraft-local/inventory/apple.png" alt="" /></button>
+            <button class="recipe-tab" type="button" style="top:27px" data-category="video" aria-label="Видео"><span class="brick-icon" aria-hidden="true"><span></span></span></button>
+            <button class="recipe-tab" type="button" style="top:54px" data-category="key" aria-label="Ключ"><img class="lava-icon" src="/static/minecraft-local/inventory/lava_bucket.png" alt="" /><img class="apple-icon" src="/static/minecraft-local/inventory/apple.png" alt="" /></button>
             <button class="recipe-tab" type="button" style="top:81px" data-category="other" aria-label="Остальное"><img src="/static/minecraft-local/inventory/redstone.png" alt="" /></button>
-            <input id="recipe-search" class="recipe-search" type="search" placeholder="Поиск..." aria-label="Поиск по справочнику" autocomplete="off" />
-            <button id="recipe-clear" class="recipe-clear" type="button" aria-label="Очистить поиск">×</button>
+            <input id="recipe-search" class="recipe-search" type="search" placeholder="Search..." aria-label="Поиск по справочнику" autocomplete="off" />
+            <button id="recipe-filter" class="recipe-filter enabled" type="button" aria-label="Показать все действия" aria-pressed="true"></button>
             <div id="recipe-grid" class="recipe-grid" aria-label="Действия"></div>
             <div id="recipe-instructions" class="recipe-instructions" aria-live="polite"></div>
           </aside>
@@ -43,7 +43,7 @@
           </button>
 
           <div class="hotbar" aria-label="Быстрый доступ">
-            <span class="hotbar-reference" aria-hidden="true"></span>
+            <span id="hotbar-selection" class="hotbar-selection" aria-hidden="true" hidden></span>
             <button id="pearl-button" class="slot-button" style="left:8px;top:142px" type="button" aria-label="Эндер-жемчуг: выбрать файл" data-tip="Эндер-жемчуг" data-detail="Выбрать видеофайл .mov">
               <img src="/static/minecraft-local/inventory/ender_pearl.png" alt="" />
             </button>
@@ -60,6 +60,7 @@
               <span class="command-icon" aria-hidden="true"><span class="command-top"></span><span class="command-left"></span><span class="command-front"></span></span>
             </button>
           </div>
+          <span id="selected-slot-announcement" class="visually-hidden" role="status"></span>
         </section>
       </div>
       </div>

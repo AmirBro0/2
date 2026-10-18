@@ -41,8 +41,12 @@ ASSETS = {
     "recipe_slot.png": "textures/gui/sprites/recipe_book/slot_craftable.png",
     "recipe_tab.png": "textures/gui/sprites/recipe_book/tab.png",
     "recipe_tab_selected.png": "textures/gui/sprites/recipe_book/tab_selected.png",
-    "bricks.png": "textures/item/brick.png",
+    "recipe_filter_enabled.png": "textures/gui/sprites/recipe_book/filter_enabled.png",
+    "recipe_filter_disabled.png": "textures/gui/sprites/recipe_book/filter_disabled.png",
+    "bricks.png": "textures/block/bricks.png",
     "apple.png": "textures/item/apple.png",
+    "lava_bucket.png": "textures/item/lava_bucket.png",
+    "crafting_table.png": "textures/block/crafting_table_front.png",
     "redstone.png": "textures/item/redstone.png",
     "compass.png": "textures/item/compass_00.png",
 }
@@ -72,11 +76,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--minecraft-dir", type=Path, default=Path(os.environ.get("APPDATA", "")) / ".minecraft")
     parser.add_argument("--jar", type=Path)
-    parser.add_argument("--hotbar-reference", type=Path, help="Optional local Minecraft hotbar screenshot supplied by the user")
+    parser.add_argument("--world-reference", type=Path, help="Optional local Minecraft world screenshot supplied by the user")
     args = parser.parse_args()
     source = extract(args.minecraft_dir, args.jar)
-    if args.hotbar_reference:
-        shutil.copyfile(args.hotbar_reference, DESTINATION / "hotbar_reference.png")
+    if args.world_reference:
+        shutil.copyfile(args.world_reference, DESTINATION / "world_reference.png")
     print(f"Local inventory textures copied from {source.name} to {DESTINATION}")
     print("Game assets are ignored by Git and must remain local.")
 
