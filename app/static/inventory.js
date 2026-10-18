@@ -1,18 +1,27 @@
 const inventory = document.querySelector("#inventory");
 const avatar = document.querySelector("#avatar");
+const avatarRig = document.querySelector("#avatar-rig");
+const inventoryLayout = document.querySelector("#inventory-layout");
+const recipePanelWrap = document.querySelector("#recipe-panel-wrap");
+const recipeGrid = document.querySelector("#recipe-grid");
+const recipeInstructions = document.querySelector("#recipe-instructions");
+const recipeSearch = document.querySelector("#recipe-search");
+const guideButton = document.querySelector("#guide-button");
 const filePicker = document.querySelector("#video-picker");
 const craftFile = document.querySelector("#craft-file");
 const craftKey = document.querySelector("#craft-key");
 const craftResult = document.querySelector("#craft-result");
 const tooltip = document.querySelector("#item-tooltip");
 const tooltipName = document.querySelector("#tooltip-name");
-const tooltipDetail = document.querySelector("#tooltip-detail");
 const backdrop = document.querySelector("#modal-backdrop");
 const modalTitle = document.querySelector("#modal-title");
 const modalContent = document.querySelector("#modal-content");
 const modalActions = document.querySelector("#modal-actions");
 const toastElement = document.querySelector("#toast");
 const assetRoot = "/static/minecraft-local/inventory/";
+const hotbarReference = new Image();
+hotbarReference.onload = () => inventory.classList.add("has-hotbar-reference");
+hotbarReference.src = `${assetRoot}hotbar_reference.png`;
 const keyStorage = "fortebank-api-key";
 const state = {
   file: null,
@@ -25,8 +34,9 @@ let font = null;
 let toastTimer = null;
 
 function resizeInventory() {
-  const scale = Math.min(3.4, (window.innerWidth - 24) / 176, (window.innerHeight - 24) / 166);
-  document.documentElement.style.setProperty("--ui-scale", Math.max(1.45, scale).toFixed(3));
+  const bookOpen = !recipePanelWrap.hidden;
+  const scale = Math.min(3.4, (window.innerWidth - 24) / (bookOpen ? 355 : 176), (window.innerHeight - 24) / 166);
+  document.documentElement.style.setProperty("--ui-scale", Math.max(bookOpen ? .75 : 1.45, scale).toFixed(3));
 }
 window.addEventListener("resize", resizeInventory);
 resizeInventory();
@@ -119,6 +129,7 @@ async function loadBitmapFont() {
   };
   setText(document.querySelector("#craft-title"), "Создание", 1);
   document.querySelector("#new-api-key")?.dispatchEvent(new Event("input"));
+  renderRecipeInstructions();
 }
 
 function setText(element, text, scale = 2, maxWidth = Infinity) {
@@ -142,10 +153,8 @@ function positionTooltip(x, y) {
 }
 
 function showTooltip(element, x, y) {
-  if (!state.tooltips || !backdrop.hidden || !element.dataset.tip) return;
-  setText(tooltipName, element.dataset.tip || "", 2);
-  setText(tooltipDetail, element.dataset.detail || "", 1.5);
-  tooltipDetail.hidden = !element.dataset.detail;
+  if (!state.tooltips || !backdrop.hidden || !element.dataset.detail) return;
+  setText(tooltipName, element.dataset.detail, 1.5);
   tooltip.hidden = false;
   positionTooltip(x, y);
 }
@@ -164,49 +173,152 @@ function bindTooltip(element) {
 }
 document.querySelectorAll("[data-tip]").forEach(bindTooltip);
 
-const skin = new Image();
-skin.src = "/static/character-art.png";
-const avatarContext = avatar.getContext("2d");
-avatarContext.imageSmoothingEnabled = false;
-const gaze = { x: 0, y: 0, targetX: 0, targetY: 0 };
-function drawAvatar() {
-  avatarContext.setTransform(3, 0, 0, 3, 0, 0);
-  avatarContext.clearRect(0, 0, 50, 70);
-  if (!skin.complete || !skin.naturalWidth) return;
-  const scaleX = 50 / skin.naturalWidth;
-  const scaleY = 70 / skin.naturalHeight;
-  const part = (x, y, width, height, offsetX = 0, offsetY = 0) => {
-    avatarContext.drawImage(
-      skin, x, y, width, height,
-      Math.round(x * scaleX + offsetX), Math.round(y * scaleY + offsetY),
-      Math.round(width * scaleX), Math.round(height * scaleY),
-    );
+const bodyParts = [
+  { name: "left-leg", x: 17, y: 43, width: 8, height: 19, depth: 7, textureX: 16, textureY: 40, side: "#1a1936", top: "#272342" },
+  { name: "right-leg", x: 25, y: 43, width: 8, height: 19, depth: 7, textureX: 23, textureY: 40, side: "#1a1936", top: "#272342" },
+  { name: "left-arm", x: 10, y: 22, width: 7, height: 21, depth: 7, textureX: 9, textureY: 20, side: "#3c2394", top: "#4b2caf" },
+  { name: "right-arm", x: 33, y: 22, width: 7, height: 21, depth: 7, textureX: 30, textureY: 20, side: "#3c2394", top: "#4b2caf" },
+  { name: "body", x: 17, y: 22, width: 16, height: 21, depth: 8, textureX: 16, textureY: 20, side: "#4526a3", top: "#5531bb" },
+  { name: "head", x: 18, y: 7, width: 14, height: 15, depth: 14, textureX: 16, textureY: 6, side: "#ab765e", top: "#1c1624" },
+];
+for (const part of bodyParts) {
+  const cuboid = document.createElement("div");
+  cuboid.className = `avatar-part ${part.name}`;
+  const sizes = {
+    left: `${part.x}px`, top: `${part.y}px`,
+    "--part-width": `${part.width}px`, "--part-height": `${part.height}px`,
+    "--part-depth": `${part.depth}px`, "--half-depth": `${part.depth / 2}px`,
+    "--half-width": `${part.width / 2}px`, "--half-height": `${part.height / 2}px`,
+    "--side-left": `${(part.width - part.depth) / 2}px`,
+    "--cap-top": `${(part.height - part.depth) / 2}px`,
+    "--texture-x": `${-part.textureX}px`, "--texture-y": `${-part.textureY}px`,
+    "--side-color": part.side, "--top-color": part.top,
   };
-  // The supplied artwork is a front portrait, not a Minecraft skin atlas.
-  // Draw its figure in pieces so the original pixels remain intact on black.
-  part(133, 350, 59, 177);
-  part(194, 350, 59, 177);
-  part(75, 174, 58, 177);
-  part(253, 174, 58, 177);
-  part(132, 173, 122, 179);
-  part(132, 56, 122, 119, Math.round(gaze.x * 2), Math.round(gaze.y));
+  for (const [property, value] of Object.entries(sizes)) cuboid.style.setProperty(property, value);
+  for (const faceName of ["front", "back", "left", "right", "top", "bottom"]) {
+    const face = document.createElement("span");
+    face.className = `avatar-face ${faceName}`;
+    cuboid.append(face);
+  }
+  avatarRig.append(cuboid);
 }
-skin.onload = drawAvatar;
+const gaze = { x: 0, y: 0, targetX: 0, targetY: 0 };
 document.addEventListener("pointermove", (event) => {
   if (!state.followCursor) return;
   const box = avatar.getBoundingClientRect();
   const centerX = box.left + box.width / 2;
   const centerY = box.top + box.height / 2;
-  gaze.targetX = Math.max(-1, Math.min(1, (event.clientX - centerX) / 260));
-  gaze.targetY = Math.max(-1, Math.min(1, (event.clientY - centerY) / 220));
+  gaze.targetX = Math.max(-1, Math.min(1, (event.clientX - centerX) / 230));
+  gaze.targetY = Math.max(-1, Math.min(1, (event.clientY - centerY) / 210));
 }, { passive: true });
 function animateAvatar() {
-  gaze.x += (gaze.targetX - gaze.x) * .14;
-  gaze.y += (gaze.targetY - gaze.y) * .14;
-  drawAvatar();
+  gaze.x += (gaze.targetX - gaze.x) * .12;
+  gaze.y += (gaze.targetY - gaze.y) * .12;
+  avatarRig.style.transform = `rotateX(${-gaze.y * 13}deg) rotateY(${gaze.x * 52}deg)`;
   requestAnimationFrame(animateAvatar);
 }
 requestAnimationFrame(animateAvatar);
+
+const recipeSteps = [
+  { id: "video", category: "video", image: "ender_pearl", name: "Видеофайл", value: "Выбрать запись .mov", instruction: "Нажмите на эндер-жемчуг внизу и выберите видеофайл .mov." },
+  { id: "key", category: "key", image: "blaze_powder", name: "Ключ", value: "Добавить X-API ключ", instruction: "Нажмите на огненный порошок: ключ займёт нижнюю правую ячейку создания." },
+  { id: "change", category: "key", image: "blaze_rod", name: "Сменить ключ", value: "Выбрать другой X-API ключ", instruction: "Огненный стержень откроет поле для другого X-API ключа." },
+  { id: "next", category: "other", image: "ender_eye", name: "Следующий шаг", value: "Открыть следующий этап", instruction: "Когда жемчуг и порошок окажутся в ячейках, появится Око Эндера." },
+  { id: "settings", category: "other", image: "command", name: "Настройки", value: "Открыть настройки", instruction: "Командный блок открывает настройки подсказок и поворота персонажа." },
+  { id: "dragon", category: "other", image: "dragon", name: "Голова дракона", value: "Назначение появится позже", instruction: "Назначение головы дракона появится на следующем этапе." },
+];
+let selectedRecipe = null;
+let recipeCategory = "all";
+
+function renderRecipeInstructions() {
+  recipeInstructions.replaceChildren();
+  const heading = document.createElement("strong");
+  const paragraph = document.createElement("p");
+  recipeInstructions.append(heading, paragraph);
+  if (selectedRecipe) {
+    setText(heading, selectedRecipe.name, 1, 124);
+    setText(paragraph, selectedRecipe.instruction, 1, 124);
+  } else {
+    setText(heading, "Как начать", 1, 124);
+    setText(paragraph, "1. Жемчуг — выберите .mov. 2. Порошок — добавьте ключ. 3. Око — следующий этап.", 1, 124);
+  }
+}
+
+function recipeIcon(step) {
+  if (step.image === "command") {
+    const iconElement = document.querySelector("#settings-button .command-icon").cloneNode(true);
+    return iconElement;
+  }
+  if (step.image === "dragon") {
+    const iconElement = document.querySelector("#dragon-button .dragon-icon").cloneNode(true);
+    return iconElement;
+  }
+  return icon(step.image);
+}
+
+function renderRecipeGrid() {
+  recipeGrid.replaceChildren();
+  const query = recipeSearch.value.trim().toLocaleLowerCase("ru");
+  const visible = recipeSteps.filter((step) =>
+    (recipeCategory === "all" || step.category === recipeCategory)
+    && (!query || `${step.name} ${step.value} ${step.instruction}`.toLocaleLowerCase("ru").includes(query)),
+  );
+  for (const step of visible) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "recipe-tile";
+    button.setAttribute("aria-label", step.name);
+    button.dataset.detail = step.value;
+    if (selectedRecipe?.id === step.id) button.classList.add("selected");
+    button.append(recipeIcon(step));
+    button.addEventListener("click", () => {
+      selectedRecipe = step;
+      renderRecipeGrid();
+      renderRecipeInstructions();
+    });
+    bindTooltip(button);
+    recipeGrid.append(button);
+  }
+  if (!visible.length) {
+    selectedRecipe = null;
+    recipeInstructions.replaceChildren();
+    setText(recipeInstructions, "Ничего не найдено", 1, 124);
+  } else if (selectedRecipe && !visible.includes(selectedRecipe)) {
+    selectedRecipe = null;
+    renderRecipeInstructions();
+  }
+}
+
+function toggleRecipeBook(force) {
+  const open = force ?? recipePanelWrap.hidden;
+  recipePanelWrap.hidden = !open;
+  inventoryLayout.classList.toggle("book-open", open);
+  guideButton.setAttribute("aria-expanded", String(open));
+  guideButton.setAttribute("aria-label", open ? "Закрыть справочник" : "Открыть справочник");
+  guideButton.dataset.detail = open ? "Закрыть справочник" : "Открыть справочник";
+  tooltip.hidden = true;
+  resizeInventory();
+  if (open) { renderRecipeGrid(); renderRecipeInstructions(); }
+}
+
+guideButton.addEventListener("click", () => toggleRecipeBook());
+recipeSearch.addEventListener("input", renderRecipeGrid);
+document.querySelector("#recipe-clear").addEventListener("click", () => {
+  recipeSearch.value = "";
+  recipeCategory = "all";
+  document.querySelectorAll(".recipe-tab").forEach((tab) => tab.classList.toggle("selected", tab.dataset.category === "all"));
+  renderRecipeGrid();
+  renderRecipeInstructions();
+  recipeSearch.focus();
+});
+document.querySelectorAll(".recipe-tab").forEach((tab) => tab.addEventListener("click", () => {
+  recipeCategory = tab.dataset.category;
+  document.querySelectorAll(".recipe-tab").forEach((candidate) => candidate.classList.toggle("selected", candidate === tab));
+  renderRecipeGrid();
+  renderRecipeInstructions();
+}));
+renderRecipeGrid();
+renderRecipeInstructions();
 
 let focusBeforeModal = null;
 function closeModal() {
@@ -251,6 +363,7 @@ backdrop.addEventListener("click", (event) => {
 });
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !backdrop.hidden) closeModal();
+  else if (event.key === "Escape" && !recipePanelWrap.hidden) toggleRecipeBook(false);
 });
 
 async function validateKey(key) {
@@ -429,12 +542,6 @@ document.querySelector("#powder-button").addEventListener("click", async () => {
 bindTooltip(craftFile);
 bindTooltip(craftKey);
 document.querySelector("#rod-button").addEventListener("click", openKeyModal);
-document.querySelector("#guide-button").addEventListener("click", () => openInfo("Справочник", [
-  "1. Нажмите на эндер-жемчуг и выберите видеофайл .mov.",
-  "2. Огненный порошок добавит X-API ключ. Стержень позволит его сменить.",
-  "3. Жемчуг и порошок займут ячейки создания. Появится Око Эндера.",
-  "4. Око откроет следующий этап проверки, когда он будет готов.",
-]));
 document.querySelector("#dragon-button").addEventListener("click", () => openInfo("Голова дракона", [
   "Назначение этого предмета появится на следующем этапе.",
 ]));

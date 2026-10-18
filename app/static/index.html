@@ -11,6 +11,19 @@
     <div class="world" aria-hidden="true"></div>
     <div class="game-hud" aria-hidden="true"><div class="health"></div><div class="hunger"></div></div>
     <main class="stage" aria-label="Инвентарь проверки видео">
+      <div id="inventory-layout" class="inventory-layout">
+        <div id="recipe-panel-wrap" class="recipe-panel-wrap" hidden>
+          <aside id="recipe-panel" class="recipe-panel" aria-label="Справочник">
+            <button class="recipe-tab selected" type="button" style="top:0px" data-category="all" aria-label="Все действия"><img src="/static/minecraft-local/inventory/compass.png" alt="" /></button>
+            <button class="recipe-tab" type="button" style="top:27px" data-category="video" aria-label="Видео"><img src="/static/minecraft-local/inventory/bricks.png" alt="" /></button>
+            <button class="recipe-tab" type="button" style="top:54px" data-category="key" aria-label="Ключ"><img src="/static/minecraft-local/inventory/apple.png" alt="" /></button>
+            <button class="recipe-tab" type="button" style="top:81px" data-category="other" aria-label="Остальное"><img src="/static/minecraft-local/inventory/redstone.png" alt="" /></button>
+            <input id="recipe-search" class="recipe-search" type="search" placeholder="Поиск..." aria-label="Поиск по справочнику" autocomplete="off" />
+            <button id="recipe-clear" class="recipe-clear" type="button" aria-label="Очистить поиск">×</button>
+            <div id="recipe-grid" class="recipe-grid" aria-label="Действия"></div>
+            <div id="recipe-instructions" class="recipe-instructions" aria-live="polite"></div>
+          </aside>
+        </div>
       <div id="inventory-wrap" class="inventory-wrap">
         <section id="inventory" class="inventory" aria-label="Инвентарь">
           <div id="craft-title" class="craft-title" data-mc-text>Создание</div>
@@ -19,11 +32,9 @@
           <img class="equipment-icon" style="left:8px;top:45px" src="/static/minecraft-local/inventory/leggings_slot.png" alt="" />
           <img class="equipment-icon" style="left:8px;top:63px" src="/static/minecraft-local/inventory/boots_slot.png" alt="" />
           <img class="equipment-icon" style="left:77px;top:63px" src="/static/minecraft-local/inventory/shield_slot.png" alt="" />
-          <canvas id="avatar" class="avatar" width="150" height="210" role="img" aria-label="Персонаж в фиолетовой одежде смотрит на указатель мыши"></canvas>
+          <div id="avatar" class="avatar" role="img" aria-label="Персонаж в фиолетовой одежде разворачивается за курсором"><div id="avatar-rig" class="avatar-rig" aria-hidden="true"></div></div>
 
-          <button id="guide-button" class="slot-button" style="left:104px;top:62px" type="button" aria-label="Справочник" data-tip="Книга знаний" data-detail="Нажмите, чтобы открыть руководство">
-            <img src="/static/minecraft-local/inventory/knowledge_book.png" alt="" />
-          </button>
+          <button id="guide-button" class="recipe-toggle" style="left:104px;top:62px" type="button" aria-label="Открыть справочник" aria-expanded="false" data-tip="Книга знаний" data-detail="Открыть справочник"></button>
 
           <div id="craft-file" class="craft-item" style="left:97px;top:17px" aria-label="Файл для проверки не выбран"></div>
           <div id="craft-key" class="craft-item" style="left:115px;top:35px" aria-label="Ключ не добавлен"></div>
@@ -32,6 +43,7 @@
           </button>
 
           <div class="hotbar" aria-label="Быстрый доступ">
+            <span class="hotbar-reference" aria-hidden="true"></span>
             <button id="pearl-button" class="slot-button" style="left:8px;top:142px" type="button" aria-label="Эндер-жемчуг: выбрать файл" data-tip="Эндер-жемчуг" data-detail="Выбрать видеофайл .mov">
               <img src="/static/minecraft-local/inventory/ender_pearl.png" alt="" />
             </button>
@@ -50,12 +62,12 @@
           </div>
         </section>
       </div>
+      </div>
     </main>
 
     <input id="video-picker" class="visually-hidden" type="file" accept=".mov,video/quicktime" />
     <div id="item-tooltip" class="item-tooltip" role="tooltip" hidden>
       <div id="tooltip-name"></div>
-      <div id="tooltip-detail" class="tooltip-detail"></div>
     </div>
 
     <div id="modal-backdrop" class="modal-backdrop" hidden>

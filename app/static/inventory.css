@@ -10,15 +10,51 @@ body { margin: 0; min-width: 300px; min-height: 100vh; background: #161b2a; colo
 .health { left: 0; background-image: url("/static/minecraft-local/inventory/hud_heart.png"); }
 .hunger { right: 0; background-image: url("/static/minecraft-local/inventory/hud_food.png"); }
 .stage { position: relative; z-index: 1; min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 12px; }
+.inventory-layout { display: flex; align-items: flex-start; width: calc(176px * var(--ui-scale)); height: calc(166px * var(--ui-scale)); }
+.inventory-layout.book-open { width: calc(355px * var(--ui-scale)); padding-left: calc(32px * var(--ui-scale)); }
+.recipe-panel-wrap { flex: none; width: calc(147px * var(--ui-scale)); height: calc(166px * var(--ui-scale)); filter: drop-shadow(0 10px 16px rgba(0,0,0,.48)); }
+.recipe-panel { position: relative; width: 147px; height: 166px; transform-origin: top left; transform: scale(var(--ui-scale)); background: url("/static/minecraft-local/inventory/recipe_book.png") left top / 256px 256px no-repeat; image-rendering: pixelated; }
+.recipe-tab { position: absolute; left: -32px; width: 35px; height: 27px; padding: 0; border: 0; background: url("/static/minecraft-local/inventory/recipe_tab.png") left top / 35px 27px no-repeat; cursor: pointer; image-rendering: pixelated; }
+.recipe-tab.selected, .recipe-tab:hover, .recipe-tab:focus-visible { background-image: url("/static/minecraft-local/inventory/recipe_tab_selected.png"); }
+.recipe-tab img { display: block; width: 16px; height: 16px; margin: 5px 8px; image-rendering: pixelated; }
+.recipe-search { position: absolute; left: 25px; top: 9px; width: 81px; height: 12px; padding: 0 2px; border: 0; outline: 0; border-radius: 0; background: #080808; color: #fff; font: italic 9px "Courier New", Consolas, monospace; }
+.recipe-search::placeholder { color: #d7d7d7; opacity: 1; }
+.recipe-clear { position: absolute; left: 111px; top: 9px; width: 24px; height: 16px; padding: 0; border: 0; background: #8b8b8b; color: #aa2d20; font: bold 17px Arial, sans-serif; line-height: 16px; text-shadow: 1px 1px #432016; cursor: pointer; }
+.recipe-clear:hover, .recipe-clear:focus-visible { background: #b6a69e; }
+.recipe-grid { position: absolute; left: 9px; top: 28px; width: 125px; height: 50px; display: grid; grid-template-columns: repeat(5, 25px); grid-auto-rows: 25px; overflow: hidden; }
+.recipe-tile { position: relative; width: 25px; height: 25px; padding: 0; border: 0; background: url("/static/minecraft-local/inventory/recipe_slot.png") left top / 25px 25px no-repeat; cursor: pointer; image-rendering: pixelated; }
+.recipe-tile:hover, .recipe-tile:focus-visible, .recipe-tile.selected { outline: 1px solid #fff; outline-offset: -3px; filter: brightness(1.16); }
+.recipe-tile img, .recipe-tile .command-icon, .recipe-tile .dragon-icon { display: block; width: 16px; height: 16px; margin: 4px 5px; image-rendering: pixelated; }
+.recipe-instructions { position: absolute; left: 10px; top: 83px; width: 124px; height: 70px; overflow: hidden; color: #fff; font: 8px/1.35 "Courier New", Consolas, monospace; }
+.recipe-instructions p { margin: 0 0 4px; }
+.recipe-instructions strong { display: block; margin-bottom: 5px; color: #f7e9a7; font-weight: 400; }
 .inventory-wrap { width: calc(176px * var(--ui-scale)); height: calc(166px * var(--ui-scale)); filter: drop-shadow(0 10px 16px rgba(0,0,0,.48)); }
 .inventory { width: 176px; height: 166px; position: relative; transform-origin: top left; transform: scale(var(--ui-scale)); background: #c6c6c6 url("/static/minecraft-local/inventory/inventory.png") left top / 256px 256px no-repeat; image-rendering: pixelated; }
 .craft-title { position: absolute; left: 97px; top: 4px; width: 75px; height: 11px; color: #3e3e3e; font-size: 9px; line-height: 11px; white-space: nowrap; }
 .mc-glyphs { display: block; image-rendering: pixelated; }
-.avatar { position: absolute; left: 26px; top: 8px; width: 50px; height: 70px; image-rendering: pixelated; cursor: crosshair; }
+.avatar { position: absolute; left: 26px; top: 8px; width: 50px; height: 70px; perspective: 100px; perspective-origin: 50% 44%; image-rendering: pixelated; overflow: hidden; }
+.avatar-rig { position: absolute; inset: 0; transform-style: preserve-3d; transform-origin: 25px 34px; will-change: transform; }
+.avatar-part { position: absolute; width: var(--part-width); height: var(--part-height); transform-style: preserve-3d; }
+.avatar-face { position: absolute; display: block; backface-visibility: hidden; image-rendering: pixelated; }
+.avatar-face.front, .avatar-face.back { width: var(--part-width); height: var(--part-height); }
+.avatar-face.front { transform: translateZ(var(--half-depth)); background: url("/static/character-art.png") var(--texture-x) var(--texture-y) / 50px 70px no-repeat; }
+.avatar-face.back { transform: rotateY(180deg) translateZ(var(--half-depth)); background: var(--side-color); }
+.avatar-face.left, .avatar-face.right { left: var(--side-left); width: var(--part-depth); height: var(--part-height); background: var(--side-color); box-shadow: inset 1px 0 rgba(255,255,255,.08), inset -1px 0 rgba(0,0,0,.3); }
+.avatar-face.left { transform: rotateY(-90deg) translateZ(var(--half-width)); }
+.avatar-face.right { transform: rotateY(90deg) translateZ(var(--half-width)); }
+.avatar-face.top, .avatar-face.bottom { top: var(--cap-top); width: var(--part-width); height: var(--part-depth); background: var(--top-color); }
+.avatar-face.top { transform: rotateX(90deg) translateZ(var(--half-height)); }
+.avatar-face.bottom { transform: rotateX(-90deg) translateZ(var(--half-height)); }
+.avatar-part.head .avatar-face.left, .avatar-part.head .avatar-face.right { background: linear-gradient(#19151f 0 26%, #aa765e 26% 100%); }
 .equipment-icon { position: absolute; width: 16px; height: 16px; image-rendering: pixelated; pointer-events: none; }
+.recipe-toggle { position: absolute; width: 20px; height: 18px; padding: 0; border: 0; background: url("/static/minecraft-local/inventory/recipe_button.png") left top / 20px 18px no-repeat; image-rendering: pixelated; cursor: pointer; }
+.recipe-toggle:hover, .recipe-toggle:focus-visible, .recipe-toggle[aria-expanded="true"] { background-image: url("/static/minecraft-local/inventory/recipe_button_highlighted.png"); }
 .slot-button, .craft-item { position: absolute; width: 18px; height: 18px; padding: 1px; border: 0; background: transparent; image-rendering: pixelated; }
 .slot-button { cursor: pointer; }
 .slot-button img, .craft-item img { display: block; width: 16px; height: 16px; image-rendering: pixelated; }
+.hotbar-reference { display: none; position: absolute; left: 7px; top: 141px; width: 90px; height: 18px; background: url("/static/minecraft-local/inventory/hotbar_reference.png") left -1px / 162px 20.66px no-repeat; pointer-events: none; image-rendering: pixelated; }
+.has-hotbar-reference .hotbar-reference { display: block; }
+.has-hotbar-reference .hotbar .slot-button > img, .has-hotbar-reference .hotbar .command-icon, .has-hotbar-reference .hotbar .dragon-icon { visibility: hidden; }
 .slot-button:hover::after, .slot-button:focus-visible::after, .craft-item:hover::after { content: ""; position: absolute; inset: 0; background: url("/static/minecraft-local/inventory/slot_highlight_front.png") left top / 18px 18px no-repeat; pointer-events: none; }
 .slot-button:focus-visible { outline: 1px solid #fff; outline-offset: 0; }
 .result-item.ready { animation: result-glow 1.2s steps(2, end) infinite; }
