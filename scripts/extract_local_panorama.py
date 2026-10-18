@@ -1,7 +1,6 @@
-"""Copy the user's installed Minecraft menu panorama for private localhost preview.
+"""Refresh the bundled menu panorama from an existing Minecraft installation.
 
-The copied game assets are deliberately excluded from Git and Docker builds.
-Do not redistribute the copied files with this project.
+Developer utility only; the project already includes these assets for normal use.
 """
 
 import argparse
@@ -54,7 +53,7 @@ def main() -> None:
     args = parser.parse_args()
     index = extract(args.minecraft_dir, DESTINATION, args.index)
     print(f"Local Minecraft panorama copied from {index} to {DESTINATION}")
-    print("These game images are ignored by Git and must remain local.")
+    print("Updated bundled panorama. Commit the changed assets with the project.")
 
 
 if __name__ == "__main__":

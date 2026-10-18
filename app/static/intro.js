@@ -306,8 +306,8 @@ form.addEventListener("submit", async (event) => {
 renderKeyInput();
 requestAnimationFrame(() => keyInput.focus());
 
-// The six images are copied from this computer's installed game, never bundled
-// with the public repository. A cube texture gives the menu a genuine 360° view.
+// The six panorama images ship with the project. A cube texture gives the menu
+// a 360-degree view without requiring a Minecraft installation or remote assets.
 async function startPanorama() {
   const gl = panoramaCanvas.getContext("webgl", { alpha: true, antialias: false, depth: false });
   if (!gl) return;

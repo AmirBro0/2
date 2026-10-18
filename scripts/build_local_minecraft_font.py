@@ -1,6 +1,6 @@
 """Build a selectable browser font from the locally extracted game glyphs.
 
-Requires fonttools and the project's OpenCV/NumPy. Output remains Git-ignored.
+Requires fonttools and the project's OpenCV/NumPy. Commit the rebuilt TTF.
 """
 import json
 import math

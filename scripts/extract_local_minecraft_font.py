@@ -1,6 +1,6 @@
-"""Copy Minecraft's installed bitmap font for private localhost preview.
+"""Refresh the bundled bitmap font from an existing Minecraft installation.
 
-The extracted game assets are ignored by Git and Docker. Do not redistribute.
+Developer utility only; the project already includes the font for normal use.
 """
 
 import argparse
@@ -60,7 +60,7 @@ def main() -> None:
     args = parser.parse_args()
     jar = extract(args.minecraft_dir, DESTINATION, args.jar)
     print(f"Local Minecraft bitmap font copied from {jar.name} to {DESTINATION}")
-    print("These game assets are ignored by Git and must remain local.")
+    print("Updated bundled glyphs. Rebuild the TTF and commit the changed assets.")
 
 
 if __name__ == "__main__":

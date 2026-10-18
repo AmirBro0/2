@@ -1,6 +1,6 @@
-"""Copy installed Minecraft inventory textures for private localhost preview.
+"""Refresh bundled inventory textures from an existing Minecraft installation.
 
-The copied game assets stay in the Git-ignored minecraft-local directory.
+Developer utility only; normal startup uses the assets included in the project.
 """
 
 import argparse
@@ -72,7 +72,7 @@ def main() -> None:
     if args.world_reference:
         shutil.copyfile(args.world_reference, DESTINATION / "world_reference.png")
     print(f"Local inventory textures copied from {source.name} to {DESTINATION}")
-    print("Game assets are ignored by Git and must remain local.")
+    print("Updated bundled inventory textures. Commit the changed assets.")
 
 
 if __name__ == "__main__":
