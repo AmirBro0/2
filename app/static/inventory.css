@@ -16,23 +16,17 @@ body { margin: 0; min-width: 300px; min-height: 100vh; background: #161b2a; colo
 .recipe-panel { position: relative; width: 147px; height: 166px; transform-origin: top left; transform: scale(var(--ui-scale)); background: url("/static/minecraft-local/inventory/recipe_book.png") left top / 256px 256px no-repeat; image-rendering: pixelated; }
 .recipe-tab { position: absolute; left: -32px; width: 35px; height: 27px; padding: 0; border: 0; background: url("/static/minecraft-local/inventory/recipe_tab.png") left top / 35px 27px no-repeat; cursor: pointer; image-rendering: pixelated; }
 .recipe-tab.selected, .recipe-tab:hover, .recipe-tab:focus-visible { background-image: url("/static/minecraft-local/inventory/recipe_tab_selected.png"); }
-.recipe-tab img { display: block; width: 16px; height: 16px; margin: 5px 8px; image-rendering: pixelated; }
-.recipe-tab .lava-icon { position: absolute; left: 3px; top: 5px; margin: 0; }
-.recipe-tab .apple-icon { position: absolute; left: 17px; top: 5px; margin: 0; }
-.brick-icon { display: block; position: relative; width: 17px; height: 17px; margin: 4px 8px; image-rendering: pixelated; }
-.brick-icon::before, .brick-icon::after, .brick-icon span { content: ""; position: absolute; display: block; background: url("/static/minecraft-local/inventory/bricks.png") center / 16px 16px; image-rendering: pixelated; }
-.brick-icon::before { left: 1px; top: 5px; width: 8px; height: 10px; transform: skewY(25deg); filter: brightness(.72); }
-.brick-icon::after { left: 9px; top: 5px; width: 8px; height: 10px; transform: skewY(-25deg); filter: brightness(.95); }
-.brick-icon span { z-index: 1; left: 4px; top: 1px; width: 10px; height: 6px; transform: skewX(-35deg); filter: brightness(1.18); }
+.recipe-tab-content { position: absolute; inset: 0 3px 0 0; display: grid; place-items: center; }
+.recipe-tab-pair { display: flex; width: 28px; height: 16px; }
+.recipe-tab-pair .item-icon + .item-icon { margin-left: -4px; }
 .recipe-search { position: absolute; left: 25px; top: 9px; width: 81px; height: 12px; padding: 0 2px; border: 0; outline: 0; border-radius: 0; background: #080808; color: #fff; font: italic 9px "Courier New", Consolas, monospace; }
 .recipe-search::placeholder { color: #d7d7d7; opacity: 1; }
 .recipe-filter { position: absolute; left: 110px; top: 9px; width: 26px; height: 16px; padding: 0; border: 0; background: url("/static/minecraft-local/inventory/recipe_filter_disabled.png") left top / 26px 16px no-repeat; image-rendering: pixelated; cursor: pointer; }
 .recipe-filter.enabled { background-image: url("/static/minecraft-local/inventory/recipe_filter_enabled.png"); }
 .recipe-filter:focus-visible { outline: 1px solid #fff; }
 .recipe-grid { position: absolute; left: 9px; top: 28px; width: 125px; height: 50px; display: grid; grid-template-columns: repeat(5, 25px); grid-auto-rows: 25px; overflow: hidden; }
-.recipe-tile { position: relative; width: 25px; height: 25px; padding: 0; border: 0; background: url("/static/minecraft-local/inventory/recipe_slot.png") left top / 25px 25px no-repeat; cursor: pointer; image-rendering: pixelated; }
+.recipe-tile { position: relative; display: grid; place-items: center; width: 25px; height: 25px; padding: 0; border: 0; background: url("/static/minecraft-local/inventory/recipe_slot.png") left top / 25px 25px no-repeat; cursor: pointer; image-rendering: pixelated; }
 .recipe-tile:hover, .recipe-tile:focus-visible, .recipe-tile.selected { outline: 1px solid #fff; outline-offset: -3px; filter: brightness(1.16); }
-.recipe-tile img, .recipe-tile .command-icon, .recipe-tile .dragon-icon { display: block; width: 16px; height: 16px; margin: 4px 5px; image-rendering: pixelated; }
 .recipe-instructions { position: absolute; left: 10px; top: 83px; width: 124px; height: 70px; overflow: hidden; color: #fff; font: 8px/1.35 "Courier New", Consolas, monospace; }
 .recipe-instructions p { margin: 0 0 4px; }
 .recipe-instructions strong { display: block; margin-bottom: 5px; color: #f7e9a7; font-weight: 400; }
@@ -57,25 +51,18 @@ body { margin: 0; min-width: 300px; min-height: 100vh; background: #161b2a; colo
 .equipment-icon { position: absolute; width: 16px; height: 16px; image-rendering: pixelated; pointer-events: none; }
 .recipe-toggle { position: absolute; width: 20px; height: 18px; padding: 0; border: 0; background: url("/static/minecraft-local/inventory/recipe_button.png") left top / 20px 18px no-repeat; image-rendering: pixelated; cursor: pointer; }
 .recipe-toggle:hover, .recipe-toggle:focus-visible, .recipe-toggle[aria-expanded="true"] { background-image: url("/static/minecraft-local/inventory/recipe_button_highlighted.png"); }
-.slot-button, .craft-item { position: absolute; width: 18px; height: 18px; padding: 1px; border: 0; background: transparent; image-rendering: pixelated; }
+.slot-button, .craft-item { position: absolute; display: grid; place-items: center; width: 18px; height: 18px; padding: 1px; border: 0; background: transparent; image-rendering: pixelated; }
 .slot-button { cursor: pointer; }
-.slot-button img, .craft-item img { display: block; width: 16px; height: 16px; image-rendering: pixelated; }
-.hotbar-selection { position: absolute; z-index: 2; left: 7px; top: 141px; width: 20px; height: 20px; border: 1px solid #fff; box-shadow: inset 1px 1px #fff, inset -1px -1px #8b8b8b, 0 0 0 1px #171717; pointer-events: none; image-rendering: pixelated; }
+.item-icon { display: block; flex: none; width: 16px; height: 16px; margin: 0; object-fit: contain; image-rendering: pixelated; translate: var(--icon-x, 0px) var(--icon-y, 0px); pointer-events: none; }
+/* Centre the visible pixels, including the original images' transparent padding. */
+.item-icon[data-item="ender_pearl"], .item-icon[data-item="ender_eye"] { --icon-x: -.5px; --icon-y: -.5px; }
+.item-icon[data-item="dragon_head"] { --icon-x: -.5px; --icon-y: -.5625px; }
+.item-icon[data-item="redstone"] { --icon-y: -.5px; }
+.hotbar-selection { position: absolute; z-index: 2; left: 6px; top: 140px; width: 20px; height: 20px; border: 1px solid #fff; box-shadow: inset 1px 1px #fff, inset -1px -1px #8b8b8b, 0 0 0 1px #171717; pointer-events: none; image-rendering: pixelated; }
 .slot-button:hover::after, .slot-button:focus-visible::after, .craft-item:hover::after { content: ""; position: absolute; inset: 0; background: url("/static/minecraft-local/inventory/slot_highlight_front.png") left top / 18px 18px no-repeat; pointer-events: none; }
 .slot-button:focus-visible { outline: 1px solid #fff; outline-offset: 0; }
 .result-item.ready { animation: result-glow 1.2s steps(2, end) infinite; }
 @keyframes result-glow { 50% { filter: brightness(1.35); } }
-.command-icon, .dragon-icon { display: block; position: relative; width: 16px; height: 16px; image-rendering: pixelated; }
-.command-top, .command-left, .command-front { position: absolute; display: block; background-repeat: no-repeat; image-rendering: pixelated; }
-.command-top { left: 4px; top: 1px; width: 9px; height: 5px; background: url("/static/minecraft-local/inventory/command_block_back.png") left top / 9px 36px no-repeat; transform: skewX(-38deg); }
-.command-left { left: 2px; top: 5px; width: 6px; height: 9px; background: url("/static/minecraft-local/inventory/command_block_side.png") left top / 9px 36px no-repeat; transform: skewY(25deg); }
-.command-front { left: 8px; top: 5px; width: 7px; height: 9px; background: url("/static/minecraft-local/inventory/command_block_front.png") left top / 9px 36px no-repeat; transform: skewY(-25deg); }
-.dragon-icon::before { content: ""; position: absolute; left: 4px; top: 4px; width: 11px; height: 9px; background: #19191e url("/static/minecraft-local/inventory/dragon.png") -99px -24px / 128px 128px no-repeat; box-shadow: inset 1px 1px #37363d, inset -2px -2px #07070a; }
-.dragon-icon::after { content: ""; position: absolute; left: 1px; top: 8px; width: 8px; height: 6px; background: #16161a; clip-path: polygon(0 0,100% 0,100% 85%,30% 100%,0 70%); box-shadow: inset 1px 1px #303037; }
-.dragon-eye { position: absolute; z-index: 1; left: 10px; top: 7px; width: 2px; height: 2px; background: #bd52ec; box-shadow: 0 0 2px #cf7fff; }
-.dragon-eye::before, .dragon-eye::after { content: ""; position: absolute; top: -6px; width: 2px; height: 5px; background: #28282e; }
-.dragon-eye::before { left: -5px; }
-.dragon-eye::after { left: 3px; }
 .item-tooltip { position: fixed; z-index: 20; min-width: 80px; max-width: min(420px, calc(100vw - 16px)); padding: 7px 9px; color: #fff; background: #100010; border: 7px solid transparent; border-image: url("/static/minecraft-local/inventory/tooltip_frame.png") 10 fill / 7px / 0 stretch; box-shadow: 0 4px 8px rgba(0,0,0,.55); pointer-events: none; image-rendering: pixelated; white-space: nowrap; font-size: 16px; text-shadow: 1px 1px #222; }
 .tooltip-detail { margin-top: 4px; color: #aaa; font-size: 12px; }
 .modal-backdrop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: rgba(0,0,0,.55); padding: 18px; }

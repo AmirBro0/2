@@ -19,6 +19,7 @@ const modalContent = document.querySelector("#modal-content");
 const modalActions = document.querySelector("#modal-actions");
 const toastElement = document.querySelector("#toast");
 const assetRoot = "/static/minecraft-local/inventory/";
+const itemRoot = `${assetRoot}items/`;
 const worldReference = new Image();
 worldReference.onload = () => document.body.classList.add("has-world-reference");
 worldReference.src = `${assetRoot}world_reference.png`;
@@ -224,8 +225,8 @@ const recipeSteps = [
   { id: "key", category: "key", image: "blaze_powder", name: "Ключ", value: "Добавить X-API ключ", instruction: "Нажмите на огненный порошок: ключ займёт нижнюю правую ячейку создания.", craftable: true },
   { id: "change", category: "key", image: "blaze_rod", name: "Сменить ключ", value: "Выбрать другой X-API ключ", instruction: "Огненный стержень откроет поле для другого X-API ключа." },
   { id: "next", category: "other", image: "ender_eye", name: "Следующий шаг", value: "Открыть следующий этап", instruction: "Когда жемчуг и порошок окажутся в ячейках, появится Око Эндера.", craftable: true },
-  { id: "settings", category: "other", image: "command", name: "Настройки", value: "Открыть настройки", instruction: "Командный блок открывает настройки подсказок и поворота персонажа." },
-  { id: "dragon", category: "other", image: "dragon", name: "Голова дракона", value: "Назначение появится позже", instruction: "Назначение головы дракона появится на следующем этапе." },
+  { id: "settings", category: "other", image: "command_block", name: "Настройки", value: "Открыть настройки", instruction: "Командный блок открывает настройки подсказок и поворота персонажа." },
+  { id: "dragon", category: "other", image: "dragon_head", name: "Голова дракона", value: "Назначение появится позже", instruction: "Назначение головы дракона появится на следующем этапе." },
 ];
 let selectedRecipe = null;
 let recipeCategory = "all";
@@ -247,18 +248,6 @@ function renderRecipeInstructions() {
   setText(paragraph, selectedRecipe.instruction, 1, 124);
 }
 
-function recipeIcon(step) {
-  if (step.image === "command") {
-    const iconElement = document.querySelector("#settings-button .command-icon").cloneNode(true);
-    return iconElement;
-  }
-  if (step.image === "dragon") {
-    const iconElement = document.querySelector("#dragon-button .dragon-icon").cloneNode(true);
-    return iconElement;
-  }
-  return icon(step.image);
-}
-
 function renderRecipeGrid() {
   recipeGrid.replaceChildren();
   const query = recipeSearch.value.trim().toLocaleLowerCase("ru");
@@ -274,7 +263,7 @@ function renderRecipeGrid() {
     button.setAttribute("aria-label", step.name);
     button.dataset.detail = step.value;
     if (selectedRecipe?.id === step.id) button.classList.add("selected");
-    button.append(recipeIcon(step));
+    button.append(icon(step.image));
     button.addEventListener("click", () => {
       selectedRecipe = selectedRecipe?.id === step.id ? null : step;
       renderRecipeGrid();
@@ -331,7 +320,7 @@ let selectedSlot = 0;
 function selectHotbarSlot(index) {
   selectedSlot = index;
   hotbarSelection.hidden = false;
-  hotbarSelection.style.left = `${7 + 18 * index}px`;
+  hotbarSelection.style.left = `${6 + 18 * index}px`;
   hotbarButtons.forEach((button, buttonIndex) => {
     if (buttonIndex === index) button.setAttribute("aria-current", "true");
     else button.removeAttribute("aria-current");
@@ -489,14 +478,20 @@ function openKeyModal() {
 
 function icon(name) {
   const image = document.createElement("img");
-  image.src = `${assetRoot}${name}.png`;
+  image.className = "item-icon";
+  image.dataset.item = name;
+  image.src = `${itemRoot}${name}.png`;
   image.alt = "";
   return image;
 }
 
 async function flyItem(source, destination, name) {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const start = source.querySelector("img")?.getBoundingClientRect() || source.getBoundingClientRect();
+  const sourceImage = source.querySelector("img");
+  const start = sourceImage?.getBoundingClientRect() || source.getBoundingClientRect();
+  const sourceStyle = getComputedStyle(sourceImage || source);
+  const offsetX = (parseFloat(sourceStyle.getPropertyValue("--icon-x")) || 0) * start.width / 16;
+  const offsetY = (parseFloat(sourceStyle.getPropertyValue("--icon-y")) || 0) * start.height / 16;
   const finish = destination.getBoundingClientRect();
   const image = icon(name);
   image.className = "flying-item";
@@ -505,8 +500,8 @@ async function flyItem(source, destination, name) {
   image.style.width = `${start.width}px`;
   image.style.height = `${start.height}px`;
   document.body.append(image);
-  const deltaX = finish.left + (finish.width - start.width) / 2 - start.left;
-  const deltaY = finish.top + (finish.height - start.height) / 2 - start.top;
+  const deltaX = finish.left + (finish.width - start.width) / 2 + offsetX - start.left;
+  const deltaY = finish.top + (finish.height - start.height) / 2 + offsetY - start.top;
   try {
     await image.animate([
       { transform: "translate(0, 0) scale(1)", opacity: 1 },

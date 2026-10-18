@@ -22,15 +22,6 @@ ASSETS = {
     "shield_slot.png": "textures/gui/sprites/container/slot/shield.png",
     "tooltip_background.png": "textures/gui/sprites/tooltip/background.png",
     "tooltip_frame.png": "textures/gui/sprites/tooltip/frame.png",
-    "ender_pearl.png": "textures/item/ender_pearl.png",
-    "blaze_powder.png": "textures/item/blaze_powder.png",
-    "blaze_rod.png": "textures/item/blaze_rod.png",
-    "knowledge_book.png": "textures/item/knowledge_book.png",
-    "ender_eye.png": "textures/item/ender_eye.png",
-    "command_block_front.png": "textures/block/command_block_front.png",
-    "command_block_side.png": "textures/block/command_block_side.png",
-    "command_block_back.png": "textures/block/command_block_back.png",
-    "dragon.png": "textures/entity/enderdragon/dragon.png",
     "moss_block.png": "textures/block/moss_block.png",
     "hud_hotbar.png": "textures/gui/sprites/hud/hotbar.png",
     "hud_heart.png": "textures/gui/sprites/hud/heart/full.png",
@@ -43,12 +34,6 @@ ASSETS = {
     "recipe_tab_selected.png": "textures/gui/sprites/recipe_book/tab_selected.png",
     "recipe_filter_enabled.png": "textures/gui/sprites/recipe_book/filter_enabled.png",
     "recipe_filter_disabled.png": "textures/gui/sprites/recipe_book/filter_disabled.png",
-    "bricks.png": "textures/block/bricks.png",
-    "apple.png": "textures/item/apple.png",
-    "lava_bucket.png": "textures/item/lava_bucket.png",
-    "crafting_table.png": "textures/block/crafting_table_front.png",
-    "redstone.png": "textures/item/redstone.png",
-    "compass.png": "textures/item/compass_00.png",
 }
 
 

@@ -14,10 +14,10 @@
       <div id="inventory-layout" class="inventory-layout">
         <div id="recipe-panel-wrap" class="recipe-panel-wrap" hidden>
           <aside id="recipe-panel" class="recipe-panel" aria-label="Справочник">
-            <button class="recipe-tab selected" type="button" style="top:0px" data-category="all" aria-label="Все действия"><img src="/static/minecraft-local/inventory/compass.png" alt="" /></button>
-            <button class="recipe-tab" type="button" style="top:27px" data-category="video" aria-label="Видео"><span class="brick-icon" aria-hidden="true"><span></span></span></button>
-            <button class="recipe-tab" type="button" style="top:54px" data-category="key" aria-label="Ключ"><img class="lava-icon" src="/static/minecraft-local/inventory/lava_bucket.png" alt="" /><img class="apple-icon" src="/static/minecraft-local/inventory/apple.png" alt="" /></button>
-            <button class="recipe-tab" type="button" style="top:81px" data-category="other" aria-label="Остальное"><img src="/static/minecraft-local/inventory/redstone.png" alt="" /></button>
+            <button class="recipe-tab selected" type="button" style="top:0px" data-category="all" aria-label="Все действия"><span class="recipe-tab-content"><img class="item-icon" data-item="compass" src="/static/minecraft-local/inventory/items/compass.png" alt="" /></span></button>
+            <button class="recipe-tab" type="button" style="top:27px" data-category="video" aria-label="Видео"><span class="recipe-tab-content"><img class="item-icon" data-item="bricks" src="/static/minecraft-local/inventory/items/bricks.png" alt="" /></span></button>
+            <button class="recipe-tab" type="button" style="top:54px" data-category="key" aria-label="Ключ"><span class="recipe-tab-content"><span class="recipe-tab-pair"><img class="item-icon" data-item="lava_bucket" src="/static/minecraft-local/inventory/items/lava_bucket.png" alt="" /><img class="item-icon" data-item="apple" src="/static/minecraft-local/inventory/items/apple.png" alt="" /></span></span></button>
+            <button class="recipe-tab" type="button" style="top:81px" data-category="other" aria-label="Остальное"><span class="recipe-tab-content"><img class="item-icon" data-item="redstone" src="/static/minecraft-local/inventory/items/redstone.png" alt="" /></span></button>
             <input id="recipe-search" class="recipe-search" type="search" placeholder="Search..." aria-label="Поиск по справочнику" autocomplete="off" />
             <button id="recipe-filter" class="recipe-filter enabled" type="button" aria-label="Показать все действия" aria-pressed="true"></button>
             <div id="recipe-grid" class="recipe-grid" aria-label="Действия"></div>
@@ -27,37 +27,37 @@
       <div id="inventory-wrap" class="inventory-wrap">
         <section id="inventory" class="inventory" aria-label="Инвентарь">
           <div id="craft-title" class="craft-title" data-mc-text>Создание</div>
-          <img class="equipment-icon" style="left:8px;top:9px" src="/static/minecraft-local/inventory/helmet_slot.png" alt="" />
-          <img class="equipment-icon" style="left:8px;top:27px" src="/static/minecraft-local/inventory/chestplate_slot.png" alt="" />
-          <img class="equipment-icon" style="left:8px;top:45px" src="/static/minecraft-local/inventory/leggings_slot.png" alt="" />
-          <img class="equipment-icon" style="left:8px;top:63px" src="/static/minecraft-local/inventory/boots_slot.png" alt="" />
-          <img class="equipment-icon" style="left:77px;top:63px" src="/static/minecraft-local/inventory/shield_slot.png" alt="" />
+          <img class="equipment-icon" style="left:8px;top:8px" src="/static/minecraft-local/inventory/helmet_slot.png" alt="" />
+          <img class="equipment-icon" style="left:8px;top:26px" src="/static/minecraft-local/inventory/chestplate_slot.png" alt="" />
+          <img class="equipment-icon" style="left:8px;top:44px" src="/static/minecraft-local/inventory/leggings_slot.png" alt="" />
+          <img class="equipment-icon" style="left:8px;top:62px" src="/static/minecraft-local/inventory/boots_slot.png" alt="" />
+          <img class="equipment-icon" style="left:77px;top:62px" src="/static/minecraft-local/inventory/shield_slot.png" alt="" />
           <div id="avatar" class="avatar" role="img" aria-label="Персонаж в фиолетовой одежде разворачивается за курсором"><div id="avatar-rig" class="avatar-rig" aria-hidden="true"></div></div>
 
           <button id="guide-button" class="recipe-toggle" style="left:104px;top:62px" type="button" aria-label="Открыть справочник" aria-expanded="false" data-tip="Книга знаний" data-detail="Открыть справочник"></button>
 
           <div id="craft-file" class="craft-item" style="left:97px;top:17px" aria-label="Файл для проверки не выбран"></div>
           <div id="craft-key" class="craft-item" style="left:115px;top:35px" aria-label="Ключ не добавлен"></div>
-          <button id="craft-result" class="slot-button result-item" style="left:154px;top:27px" type="button" aria-label="Око Эндера" data-tip="Око Эндера" data-detail="Открыть следующий этап" hidden>
-            <img src="/static/minecraft-local/inventory/ender_eye.png" alt="" />
+          <button id="craft-result" class="slot-button result-item" style="left:153px;top:27px" type="button" aria-label="Око Эндера" data-tip="Око Эндера" data-detail="Открыть следующий этап" hidden>
+            <img class="item-icon" data-item="ender_eye" src="/static/minecraft-local/inventory/items/ender_eye.png" alt="" />
           </button>
 
           <div class="hotbar" aria-label="Быстрый доступ">
             <span id="hotbar-selection" class="hotbar-selection" aria-hidden="true" hidden></span>
-            <button id="pearl-button" class="slot-button" style="left:8px;top:142px" type="button" aria-label="Эндер-жемчуг: выбрать файл" data-tip="Эндер-жемчуг" data-detail="Выбрать видеофайл .mov">
-              <img src="/static/minecraft-local/inventory/ender_pearl.png" alt="" />
+            <button id="pearl-button" class="slot-button" style="left:7px;top:141px" type="button" aria-label="Эндер-жемчуг: выбрать файл" data-tip="Эндер-жемчуг" data-detail="Выбрать видеофайл .mov">
+              <img class="item-icon" data-item="ender_pearl" src="/static/minecraft-local/inventory/items/ender_pearl.png" alt="" />
             </button>
-            <button id="powder-button" class="slot-button" style="left:26px;top:142px" type="button" aria-label="Огненный порошок: добавить ключ" data-tip="Огненный порошок" data-detail="Добавить X-API ключ в создание">
-              <img src="/static/minecraft-local/inventory/blaze_powder.png" alt="" />
+            <button id="powder-button" class="slot-button" style="left:25px;top:141px" type="button" aria-label="Огненный порошок: добавить ключ" data-tip="Огненный порошок" data-detail="Добавить X-API ключ в создание">
+              <img class="item-icon" data-item="blaze_powder" src="/static/minecraft-local/inventory/items/blaze_powder.png" alt="" />
             </button>
-            <button id="rod-button" class="slot-button" style="left:44px;top:142px" type="button" aria-label="Огненный стержень: изменить ключ" data-tip="Огненный стержень" data-detail="Выбрать другой X-API ключ">
-              <img src="/static/minecraft-local/inventory/blaze_rod.png" alt="" />
+            <button id="rod-button" class="slot-button" style="left:43px;top:141px" type="button" aria-label="Огненный стержень: изменить ключ" data-tip="Огненный стержень" data-detail="Выбрать другой X-API ключ">
+              <img class="item-icon" data-item="blaze_rod" src="/static/minecraft-local/inventory/items/blaze_rod.png" alt="" />
             </button>
-            <button id="dragon-button" class="slot-button" style="left:62px;top:142px" type="button" aria-label="Голова дракона" data-tip="Голова дракона" data-detail="Назначение появится позже">
-              <span class="dragon-icon" aria-hidden="true"><span class="dragon-eye"></span></span>
+            <button id="dragon-button" class="slot-button" style="left:61px;top:141px" type="button" aria-label="Голова дракона" data-tip="Голова дракона" data-detail="Назначение появится позже">
+              <img class="item-icon" data-item="dragon_head" src="/static/minecraft-local/inventory/items/dragon_head.png" alt="" />
             </button>
-            <button id="settings-button" class="slot-button" style="left:80px;top:142px" type="button" aria-label="Командный блок: настройки" data-tip="Командный блок" data-detail="Открыть настройки">
-              <span class="command-icon" aria-hidden="true"><span class="command-top"></span><span class="command-left"></span><span class="command-front"></span></span>
+            <button id="settings-button" class="slot-button" style="left:79px;top:141px" type="button" aria-label="Командный блок: настройки" data-tip="Командный блок" data-detail="Открыть настройки">
+              <img class="item-icon" data-item="command_block" src="/static/minecraft-local/inventory/items/command_block.png" alt="" />
             </button>
           </div>
           <span id="selected-slot-announcement" class="visually-hidden" role="status"></span>
