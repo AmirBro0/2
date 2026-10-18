@@ -34,20 +34,10 @@ body { margin: 0; min-width: 300px; min-height: 100vh; background: #161b2a; colo
 .inventory { width: 176px; height: 166px; position: relative; transform-origin: top left; transform: scale(var(--ui-scale)); background: #c6c6c6 url("/static/minecraft-local/inventory/inventory.png") left top / 256px 256px no-repeat; image-rendering: pixelated; }
 .craft-title { position: absolute; left: 97px; top: 4px; width: 75px; height: 11px; color: #3e3e3e; font-size: 9px; line-height: 11px; white-space: nowrap; }
 .mc-glyphs { display: block; image-rendering: pixelated; }
-.avatar { position: absolute; left: 26px; top: 8px; width: 50px; height: 70px; perspective: 100px; perspective-origin: 50% 44%; image-rendering: pixelated; overflow: hidden; }
-.avatar-rig { position: absolute; inset: 0; transform-style: preserve-3d; transform-origin: 25px 34px; will-change: transform; }
-.avatar-part { position: absolute; width: var(--part-width); height: var(--part-height); transform-style: preserve-3d; }
-.avatar-face { position: absolute; display: block; backface-visibility: hidden; image-rendering: pixelated; }
-.avatar-face.front, .avatar-face.back { width: var(--part-width); height: var(--part-height); }
-.avatar-face.front { transform: translateZ(var(--half-depth)); background: url("/static/character-art.png") var(--texture-x) var(--texture-y) / 50px 70px no-repeat; }
-.avatar-face.back { transform: rotateY(180deg) translateZ(var(--half-depth)); background: var(--side-color); }
-.avatar-face.left, .avatar-face.right { left: var(--side-left); width: var(--part-depth); height: var(--part-height); background: var(--side-color); box-shadow: inset 1px 0 rgba(255,255,255,.08), inset -1px 0 rgba(0,0,0,.3); }
-.avatar-face.left { transform: rotateY(-90deg) translateZ(var(--half-width)); }
-.avatar-face.right { transform: rotateY(90deg) translateZ(var(--half-width)); }
-.avatar-face.top, .avatar-face.bottom { top: var(--cap-top); width: var(--part-width); height: var(--part-depth); background: var(--top-color); }
-.avatar-face.top { transform: rotateX(90deg) translateZ(var(--half-height)); }
-.avatar-face.bottom { transform: rotateX(-90deg) translateZ(var(--half-height)); }
-.avatar-part.head .avatar-face.left, .avatar-part.head .avatar-face.right { background: linear-gradient(#19151f 0 26%, #aa765e 26% 100%); }
+.avatar { position: absolute; left: 26px; top: 8px; width: 50px; height: 70px; image-rendering: pixelated; overflow: hidden; }
+.avatar canvas { display: block; position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.avatar-fallback { position: absolute; left: 11px; top: 7px; width: 28px; height: 56px; background: url("/static/character-art.png") -8.96px -6.92px / 50.15px 73.91px no-repeat; }
+.avatar.model-ready .avatar-fallback { display: none; }
 .equipment-icon { position: absolute; width: 16px; height: 16px; image-rendering: pixelated; pointer-events: none; }
 .recipe-toggle { position: absolute; width: 20px; height: 18px; padding: 0; border: 0; background: url("/static/minecraft-local/inventory/recipe_button.png") left top / 20px 18px no-repeat; image-rendering: pixelated; cursor: pointer; }
 .recipe-toggle:hover, .recipe-toggle:focus-visible, .recipe-toggle[aria-expanded="true"] { background-image: url("/static/minecraft-local/inventory/recipe_button_highlighted.png"); }

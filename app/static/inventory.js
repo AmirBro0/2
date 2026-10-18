@@ -1,6 +1,5 @@
 const inventory = document.querySelector("#inventory");
 const avatar = document.querySelector("#avatar");
-const avatarRig = document.querySelector("#avatar-rig");
 const inventoryLayout = document.querySelector("#inventory-layout");
 const recipePanelWrap = document.querySelector("#recipe-panel-wrap");
 const recipeGrid = document.querySelector("#recipe-grid");
@@ -174,51 +173,7 @@ function bindTooltip(element) {
 }
 document.querySelectorAll("[data-tip]").forEach(bindTooltip);
 
-const bodyParts = [
-  { name: "left-leg", x: 17, y: 43, width: 8, height: 19, depth: 7, textureX: 16, textureY: 40, side: "#1a1936", top: "#272342" },
-  { name: "right-leg", x: 25, y: 43, width: 8, height: 19, depth: 7, textureX: 23, textureY: 40, side: "#1a1936", top: "#272342" },
-  { name: "left-arm", x: 10, y: 22, width: 7, height: 21, depth: 7, textureX: 9, textureY: 20, side: "#3c2394", top: "#4b2caf" },
-  { name: "right-arm", x: 33, y: 22, width: 7, height: 21, depth: 7, textureX: 30, textureY: 20, side: "#3c2394", top: "#4b2caf" },
-  { name: "body", x: 17, y: 22, width: 16, height: 21, depth: 8, textureX: 16, textureY: 20, side: "#4526a3", top: "#5531bb" },
-  { name: "head", x: 18, y: 7, width: 14, height: 15, depth: 14, textureX: 16, textureY: 6, side: "#ab765e", top: "#1c1624" },
-];
-for (const part of bodyParts) {
-  const cuboid = document.createElement("div");
-  cuboid.className = `avatar-part ${part.name}`;
-  const sizes = {
-    left: `${part.x}px`, top: `${part.y}px`,
-    "--part-width": `${part.width}px`, "--part-height": `${part.height}px`,
-    "--part-depth": `${part.depth}px`, "--half-depth": `${part.depth / 2}px`,
-    "--half-width": `${part.width / 2}px`, "--half-height": `${part.height / 2}px`,
-    "--side-left": `${(part.width - part.depth) / 2}px`,
-    "--cap-top": `${(part.height - part.depth) / 2}px`,
-    "--texture-x": `${-part.textureX}px`, "--texture-y": `${-part.textureY}px`,
-    "--side-color": part.side, "--top-color": part.top,
-  };
-  for (const [property, value] of Object.entries(sizes)) cuboid.style.setProperty(property, value);
-  for (const faceName of ["front", "back", "left", "right", "top", "bottom"]) {
-    const face = document.createElement("span");
-    face.className = `avatar-face ${faceName}`;
-    cuboid.append(face);
-  }
-  avatarRig.append(cuboid);
-}
-const gaze = { x: 0, y: 0, targetX: 0, targetY: 0 };
-document.addEventListener("pointermove", (event) => {
-  if (!state.followCursor) return;
-  const box = avatar.getBoundingClientRect();
-  const centerX = box.left + box.width / 2;
-  const centerY = box.top + box.height / 2;
-  gaze.targetX = Math.max(-1, Math.min(1, (event.clientX - centerX) / 230));
-  gaze.targetY = Math.max(-1, Math.min(1, (event.clientY - centerY) / 210));
-}, { passive: true });
-function animateAvatar() {
-  gaze.x += (gaze.targetX - gaze.x) * .12;
-  gaze.y += (gaze.targetY - gaze.y) * .12;
-  avatarRig.style.transform = `rotateX(${-gaze.y * 13}deg) rotateY(${gaze.x * 52}deg)`;
-  requestAnimationFrame(animateAvatar);
-}
-requestAnimationFrame(animateAvatar);
+const character = new window.InventoryCharacter(avatar, state.followCursor);
 
 const recipeSteps = [
   { id: "video", category: "video", image: "ender_pearl", name: "Видеофайл", value: "Выбрать запись .mov", instruction: "Нажмите на эндер-жемчуг внизу и выберите видеофайл .mov." },
@@ -590,7 +545,7 @@ document.querySelector("#settings-button").addEventListener("click", () => {
   setting("Персонаж следит за курсором", state.followCursor, (enabled) => {
     state.followCursor = enabled;
     localStorage.setItem("inventory-follow-cursor", enabled ? "on" : "off");
-    if (!enabled) { gaze.targetX = 0; gaze.targetY = 0; }
+    character.setFollowCursor(enabled);
   });
   modalButton("Готово", closeModal).focus();
 });
