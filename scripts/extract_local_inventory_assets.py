@@ -14,6 +14,11 @@ ASSETS = {
     "inventory.png": "textures/gui/container/inventory.png",
     "slot.png": "textures/gui/sprites/container/slot.png",
     "slot_highlight_front.png": "textures/gui/sprites/container/slot_highlight_front.png",
+    "helmet_slot.png": "textures/gui/sprites/container/slot/helmet.png",
+    "chestplate_slot.png": "textures/gui/sprites/container/slot/chestplate.png",
+    "leggings_slot.png": "textures/gui/sprites/container/slot/leggings.png",
+    "boots_slot.png": "textures/gui/sprites/container/slot/boots.png",
+    "shield_slot.png": "textures/gui/sprites/container/slot/shield.png",
     "tooltip_background.png": "textures/gui/sprites/tooltip/background.png",
     "tooltip_frame.png": "textures/gui/sprites/tooltip/frame.png",
     "ender_pearl.png": "textures/item/ender_pearl.png",
@@ -25,6 +30,10 @@ ASSETS = {
     "command_block_side.png": "textures/block/command_block_side.png",
     "command_block_back.png": "textures/block/command_block_back.png",
     "dragon.png": "textures/entity/enderdragon/dragon.png",
+    "moss_block.png": "textures/block/moss_block.png",
+    "hud_hotbar.png": "textures/gui/sprites/hud/hotbar.png",
+    "hud_heart.png": "textures/gui/sprites/hud/heart/full.png",
+    "hud_food.png": "textures/gui/sprites/hud/food_full.png",
 }
 
 

@@ -3,14 +3,19 @@
 [hidden] { display: none !important; }
 body { margin: 0; min-width: 300px; min-height: 100vh; background: #161b2a; color: #fff; overflow: hidden; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
-.world { position: fixed; inset: -4%; z-index: -1; background: linear-gradient(rgba(14,17,26,.48),rgba(8,9,16,.68)), url("/static/minecraft-local/panorama_0.png") center / cover no-repeat; filter: blur(4px); animation: world-drift 34s ease-in-out infinite alternate; }
+.world { position: fixed; inset: -4%; z-index: -1; background: radial-gradient(circle at 48% 45%, rgba(39,64,25,.1), rgba(0,0,0,.58)), linear-gradient(rgba(5,10,4,.72), rgba(8,12,5,.82)), url("/static/minecraft-local/inventory/moss_block.png") left top / 96px 96px repeat; image-rendering: pixelated; filter: blur(1px); animation: world-drift 34s ease-in-out infinite alternate; }
 @keyframes world-drift { from { transform: scale(1.04) translateX(-1%); } to { transform: scale(1.11) translateX(1%); } }
-.stage { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 12px; }
+.game-hud { position: fixed; z-index: 0; left: 50%; bottom: -24px; width: calc(182px * var(--ui-scale)); height: calc(35px * var(--ui-scale)); transform: translateX(-50%); opacity: .48; image-rendering: pixelated; background: url("/static/minecraft-local/inventory/hud_hotbar.png") center bottom / 100% calc(22px * var(--ui-scale)) no-repeat; pointer-events: none; }
+.health, .hunger { position: absolute; top: 0; width: calc(90px * var(--ui-scale)); height: calc(9px * var(--ui-scale)); background-repeat: repeat-x; background-size: calc(9px * var(--ui-scale)) calc(9px * var(--ui-scale)); }
+.health { left: 0; background-image: url("/static/minecraft-local/inventory/hud_heart.png"); }
+.hunger { right: 0; background-image: url("/static/minecraft-local/inventory/hud_food.png"); }
+.stage { position: relative; z-index: 1; min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 12px; }
 .inventory-wrap { width: calc(176px * var(--ui-scale)); height: calc(166px * var(--ui-scale)); filter: drop-shadow(0 10px 16px rgba(0,0,0,.48)); }
 .inventory { width: 176px; height: 166px; position: relative; transform-origin: top left; transform: scale(var(--ui-scale)); background: #c6c6c6 url("/static/minecraft-local/inventory/inventory.png") left top / 256px 256px no-repeat; image-rendering: pixelated; }
 .craft-title { position: absolute; left: 97px; top: 4px; width: 75px; height: 11px; color: #3e3e3e; font-size: 9px; line-height: 11px; white-space: nowrap; }
 .mc-glyphs { display: block; image-rendering: pixelated; }
 .avatar { position: absolute; left: 26px; top: 8px; width: 50px; height: 70px; image-rendering: pixelated; cursor: crosshair; }
+.equipment-icon { position: absolute; width: 16px; height: 16px; image-rendering: pixelated; pointer-events: none; }
 .slot-button, .craft-item { position: absolute; width: 18px; height: 18px; padding: 1px; border: 0; background: transparent; image-rendering: pixelated; }
 .slot-button { cursor: pointer; }
 .slot-button img, .craft-item img { display: block; width: 16px; height: 16px; image-rendering: pixelated; }
@@ -20,11 +25,15 @@ body { margin: 0; min-width: 300px; min-height: 100vh; background: #161b2a; colo
 @keyframes result-glow { 50% { filter: brightness(1.35); } }
 .command-icon, .dragon-icon { display: block; position: relative; width: 16px; height: 16px; image-rendering: pixelated; }
 .command-top, .command-left, .command-front { position: absolute; display: block; background-repeat: no-repeat; image-rendering: pixelated; }
-.command-top { left: 4px; top: 1px; width: 9px; height: 5px; background: url("/static/minecraft-local/inventory/command_block_back.png") center / 9px 9px; transform: skewX(-38deg); }
-.command-left { left: 2px; top: 5px; width: 6px; height: 9px; background: url("/static/minecraft-local/inventory/command_block_side.png") center / 9px 9px; transform: skewY(25deg); }
-.command-front { left: 8px; top: 5px; width: 7px; height: 9px; background: url("/static/minecraft-local/inventory/command_block_front.png") center / 9px 9px; transform: skewY(-25deg); }
-.dragon-icon { background: #151516 url("/static/minecraft-local/inventory/dragon.png") -100px -8px / 128px 128px no-repeat; clip-path: polygon(7% 30%,26% 27%,33% 6%,48% 23%,65% 13%,78% 30%,94% 32%,94% 81%,70% 87%,60% 96%,31% 94%,23% 84%,5% 80%); filter: drop-shadow(1px 1px #050505); }
-.dragon-eye { position: absolute; left: 9px; top: 6px; width: 3px; height: 2px; background: #b550ed; box-shadow: 0 0 2px #cf7fff; }
+.command-top { left: 4px; top: 1px; width: 9px; height: 5px; background: url("/static/minecraft-local/inventory/command_block_back.png") left top / 9px 36px no-repeat; transform: skewX(-38deg); }
+.command-left { left: 2px; top: 5px; width: 6px; height: 9px; background: url("/static/minecraft-local/inventory/command_block_side.png") left top / 9px 36px no-repeat; transform: skewY(25deg); }
+.command-front { left: 8px; top: 5px; width: 7px; height: 9px; background: url("/static/minecraft-local/inventory/command_block_front.png") left top / 9px 36px no-repeat; transform: skewY(-25deg); }
+.dragon-icon::before { content: ""; position: absolute; left: 4px; top: 4px; width: 11px; height: 9px; background: #19191e url("/static/minecraft-local/inventory/dragon.png") -99px -24px / 128px 128px no-repeat; box-shadow: inset 1px 1px #37363d, inset -2px -2px #07070a; }
+.dragon-icon::after { content: ""; position: absolute; left: 1px; top: 8px; width: 8px; height: 6px; background: #16161a; clip-path: polygon(0 0,100% 0,100% 85%,30% 100%,0 70%); box-shadow: inset 1px 1px #303037; }
+.dragon-eye { position: absolute; z-index: 1; left: 10px; top: 7px; width: 2px; height: 2px; background: #bd52ec; box-shadow: 0 0 2px #cf7fff; }
+.dragon-eye::before, .dragon-eye::after { content: ""; position: absolute; top: -6px; width: 2px; height: 5px; background: #28282e; }
+.dragon-eye::before { left: -5px; }
+.dragon-eye::after { left: 3px; }
 .item-tooltip { position: fixed; z-index: 20; min-width: 80px; max-width: min(420px, calc(100vw - 16px)); padding: 7px 9px; color: #fff; background: #100010; border: 7px solid transparent; border-image: url("/static/minecraft-local/inventory/tooltip_frame.png") 10 fill / 7px / 0 stretch; box-shadow: 0 4px 8px rgba(0,0,0,.55); pointer-events: none; image-rendering: pixelated; white-space: nowrap; font-size: 16px; text-shadow: 1px 1px #222; }
 .tooltip-detail { margin-top: 4px; color: #aaa; font-size: 12px; }
 .modal-backdrop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: rgba(0,0,0,.55); padding: 18px; }
@@ -51,3 +60,4 @@ body { margin: 0; min-width: 300px; min-height: 100vh; background: #161b2a; colo
 .toast { position: fixed; left: 50%; bottom: 22px; z-index: 25; transform: translateX(-50%); max-width: calc(100vw - 24px); padding: 10px 14px; color: #fff; background: #100010; border: 2px solid #593597; box-shadow: 0 3px 0 #060309; text-align: center; font: 15px "Courier New", Consolas, monospace; }
 .flying-item { position: fixed; z-index: 24; width: 16px; height: 16px; pointer-events: none; image-rendering: pixelated; }
 @media (prefers-reduced-motion: reduce) { .world, .result-item.ready { animation: none; } }
+@media (max-width: 600px), (max-height: 650px) { .game-hud { display: none; } }

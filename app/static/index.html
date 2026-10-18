@@ -9,11 +9,17 @@
   </head>
   <body>
     <div class="world" aria-hidden="true"></div>
+    <div class="game-hud" aria-hidden="true"><div class="health"></div><div class="hunger"></div></div>
     <main class="stage" aria-label="Инвентарь проверки видео">
       <div id="inventory-wrap" class="inventory-wrap">
         <section id="inventory" class="inventory" aria-label="Инвентарь">
           <div id="craft-title" class="craft-title" data-mc-text>Создание</div>
-          <canvas id="avatar" class="avatar" width="50" height="70" role="img" aria-label="Персонаж в костюме смотрит на указатель мыши"></canvas>
+          <img class="equipment-icon" style="left:8px;top:9px" src="/static/minecraft-local/inventory/helmet_slot.png" alt="" />
+          <img class="equipment-icon" style="left:8px;top:27px" src="/static/minecraft-local/inventory/chestplate_slot.png" alt="" />
+          <img class="equipment-icon" style="left:8px;top:45px" src="/static/minecraft-local/inventory/leggings_slot.png" alt="" />
+          <img class="equipment-icon" style="left:8px;top:63px" src="/static/minecraft-local/inventory/boots_slot.png" alt="" />
+          <img class="equipment-icon" style="left:77px;top:63px" src="/static/minecraft-local/inventory/shield_slot.png" alt="" />
+          <canvas id="avatar" class="avatar" width="150" height="210" role="img" aria-label="Персонаж в фиолетовой одежде смотрит на указатель мыши"></canvas>
 
           <button id="guide-button" class="slot-button" style="left:104px;top:62px" type="button" aria-label="Справочник" data-tip="Книга знаний" data-detail="Нажмите, чтобы открыть руководство">
             <img src="/static/minecraft-local/inventory/knowledge_book.png" alt="" />

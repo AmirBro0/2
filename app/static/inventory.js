@@ -25,7 +25,7 @@ let font = null;
 let toastTimer = null;
 
 function resizeInventory() {
-  const scale = Math.min(3, (window.innerWidth - 24) / 176, (window.innerHeight - 24) / 166);
+  const scale = Math.min(3.4, (window.innerWidth - 24) / 176, (window.innerHeight - 24) / 166);
   document.documentElement.style.setProperty("--ui-scale", Math.max(1.45, scale).toFixed(3));
 }
 window.addEventListener("resize", resizeInventory);
@@ -165,32 +165,31 @@ function bindTooltip(element) {
 document.querySelectorAll("[data-tip]").forEach(bindTooltip);
 
 const skin = new Image();
-skin.src = "/static/custom-skin.png";
+skin.src = "/static/character-art.png";
 const avatarContext = avatar.getContext("2d");
 avatarContext.imageSmoothingEnabled = false;
 const gaze = { x: 0, y: 0, targetX: 0, targetY: 0 };
 function drawAvatar() {
+  avatarContext.setTransform(3, 0, 0, 3, 0, 0);
   avatarContext.clearRect(0, 0, 50, 70);
   if (!skin.complete || !skin.naturalWidth) return;
-  const unitX = skin.naturalWidth / 64;
-  const unitY = skin.naturalHeight / 32;
-  const crop = (sx, sy, sw, sh, dx, dy, dw, dh) => {
-    avatarContext.drawImage(skin, sx * unitX, sy * unitY, sw * unitX, sh * unitY, dx, dy, dw, dh);
+  const scaleX = 50 / skin.naturalWidth;
+  const scaleY = 70 / skin.naturalHeight;
+  const part = (x, y, width, height, offsetX = 0, offsetY = 0) => {
+    avatarContext.drawImage(
+      skin, x, y, width, height,
+      Math.round(x * scaleX + offsetX), Math.round(y * scaleY + offsetY),
+      Math.round(width * scaleX), Math.round(height * scaleY),
+    );
   };
-  const lean = Math.round(gaze.x * 1.5);
-  avatarContext.fillStyle = "#142440";
-  avatarContext.fillRect(16 + lean, 46, 8, 19);
-  avatarContext.fillRect(26 + lean, 46, 8, 19);
-  crop(0, 28, 8, 4, 15 + lean, 63, 9, 6);
-  crop(40, 28, 8, 4, 26 + lean, 63, 9, 6);
-  crop(0, 20, 16, 12, 7 + lean, 22, 8, 28);
-  crop(40, 20, 16, 12, 35 + lean, 22, 8, 28);
-  crop(16, 20, 24, 12, 14 + lean, 22, 22, 27);
-  const headX = Math.round(17 + gaze.x * 3);
-  const headY = Math.round(4 + gaze.y * 2);
-  if (gaze.x < -.15) crop(2, 8, 8, 8, headX - 2, headY, 4, 18);
-  if (gaze.x > .15) crop(18, 8, 8, 8, headX + 14, headY, 4, 18);
-  crop(10, 8, 8, 8, headX, headY, 16, 18);
+  // The supplied artwork is a front portrait, not a Minecraft skin atlas.
+  // Draw its figure in pieces so the original pixels remain intact on black.
+  part(133, 350, 59, 177);
+  part(194, 350, 59, 177);
+  part(75, 174, 58, 177);
+  part(253, 174, 58, 177);
+  part(132, 173, 122, 179);
+  part(132, 56, 122, 119, Math.round(gaze.x * 2), Math.round(gaze.y));
 }
 skin.onload = drawAvatar;
 document.addEventListener("pointermove", (event) => {
